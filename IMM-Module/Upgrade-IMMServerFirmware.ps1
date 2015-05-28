@@ -27,7 +27,7 @@
 .NOTES
 	Author: Roman Gelman
 .LINK
-	https://github.com/rgel/PowerShell/IMM-Module
+	https://github.com/rgel/PowerShell/tree/master/IMM-Module
 #>
 
 #region Params
