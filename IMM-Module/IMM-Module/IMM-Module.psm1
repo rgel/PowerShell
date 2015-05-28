@@ -1,6 +1,13 @@
 <#
 .NOTES
-	IMM-Module ChangeLog
+	IMM-Module CHANGELOG
+	
+	1.1 - 27/05/2015 - Function Improvements
+	
+		(1) Functions:	Get-IMMISO, Mount-IMMISO
+			Changes:	Added 'rdmount' running process check in the 'Begin' scope before function call;
+		(2)	Function:	Set-IMMServerBootOrder
+			Changes:	Added 'Windows Boot Manager' entry in [ValidateSet()] statement for all Boot devices;
 	
 	1.0 - 17/05/2015 - Initial release
 #>
@@ -2214,28 +2221,28 @@ Param (
 		Mandatory=$false,Position=4,
 		HelpMessage = "First boot device"
 		)]
-		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','VDIESXi5.5','ESXi5VDI')]
+		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI')]
 	[System.String]$Boot1 = 'CD/DVD Rom'
 	,
 	[Parameter(
 		Mandatory=$false,Position=5,
 		HelpMessage = "Second boot device"
 		)]
-		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','VDIESXi5.5','ESXi5VDI')]
+		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI')]
 	[System.String]$Boot2 = 'Floppy Disk'
 	,
 	[Parameter(
 		Mandatory=$false,Position=6,
 		HelpMessage = "Third boot device"
 		)]
-		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','VDIESXi5.5','ESXi5VDI')]
+		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI')]
 	[System.String]$Boot3 = 'Hard Disk 0'
 	,
 	[Parameter(
 		Mandatory=$false,Position=7,
 		HelpMessage = "Fourth boot device"
 		)]
-		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','VDIESXi5.5','ESXi5VDI','')]
+		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI','')]
 	[System.String]$Boot4 = 'PXE Network'
 	
 )
@@ -2411,6 +2418,8 @@ Param (
 Begin {
 
 	If (!(Test-Path -Path FileSystem::$RDMExec)) {Throw "RDCLI executable '$RDMExec' not found"}
+	$rdmRunning = Get-Process |? {$_.Name -eq 'rdmount'}
+	If ($rdmRunning) {Throw "'rdmount' process already running with Process Id $($rdmRunning.Id)"}
 	If ($IMMCred) {
 		$IMMLogin = $IMMCred.GetNetworkCredential().UserName
 		$IMMPwd   = $IMMCred.GetNetworkCredential().Password
@@ -2549,6 +2558,8 @@ Param (
 Begin {
 
 	If (!(Test-Path -Path FileSystem::$RDMExec)) {Throw "RDCLI executable '$RDMExec' not found"}
+	$rdmRunning = Get-Process |? {$_.Name -eq 'rdmount'}
+	If ($rdmRunning) {Throw "'rdmount' process already running with Process Id $($rdmRunning.Id)"}
 	If ($IMMCred) {
 		$IMMLogin = $IMMCred.GetNetworkCredential().UserName
 		$IMMPwd   = $IMMCred.GetNetworkCredential().Password
