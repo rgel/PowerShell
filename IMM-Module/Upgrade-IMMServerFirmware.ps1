@@ -48,7 +48,7 @@ Param (
 		)]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
-	[System.Management.Automation.PSCredential]$IMMCred = (Get-Credential -UserName ribadmin -Message "IMM Supervisor Login")
+	[System.Management.Automation.PSCredential]$IMMCred = (Get-Credential -UserName customLoginID -Message "IMM Supervisor Login")
 	,
 	[Parameter(
 		Mandatory=$false,Position=2,HelpMessage = 'Firmware upgrade process log file (txt|log)'
@@ -82,7 +82,7 @@ Param (
 $psModules = @('IMM-Module')
 Try {
 	Foreach ($psModule in $psModules) {
-		If ((Get-Module -Name $psModule -ErrorAction SilentlyContinue) -eq $null) {Import-Module -Name $psModule -ErrorAction Stop}
+		If ((Get-Module -Name $psModule -ErrorAction SilentlyContinue) -eq $null) {Import-Module -Name $psModule -Force -ErrorAction Stop}
 	}
 }
 Catch {{"`n$($_.Exception.Message)"; Exit 1}}
