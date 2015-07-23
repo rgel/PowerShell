@@ -1,25 +1,25 @@
+#requires -version 3.0
+#requires -Modules 'IMM-Module'
+
 <#
 .SYNOPSIS
     Upgrade IBM server's Firmware.
-	Use "IMM-Module.psm1" PowerShell module and BoMC unattended ISO image.
+	Make use of "IMM-Module.psm1" PowerShell module and BoMC unattended ISO image.
 .DESCRIPTION
     This script upgrade IBM server's Firmware from BoMC ISO image.
-	Use IMM-Module.psm1 PowerShell module and BoMC unattended ISO image.
+	Make use of "IMM-Module.psm1" PowerShell module and BoMC unattended ISO image.
 .PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMCred/Credentials (optional, default Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER IMMLog/Log (optional, change default value to meet your environment)
-    Firmware upgrade process log file (txt|log).
-.PARAMETER IMMConfig/Config (optional, change default value to meet your environment)
-	Generic IMM config file (csv).
-.PARAMETER BoMC/ISO (optional, change default value to meet your environment)
-	BoMC prepared unattended Firmware ISO file.
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (optional, default Get-Credential Cmdlet object).
+.PARAMETER IMMLog
+    Firmware upgrade process log file (optional, change default value to meet your environment).
+.PARAMETER IMMConfig
+	Generic IMM config CSV-file (optional, change default value to meet your environment).
+.PARAMETER BoMC
+	BoMC prepared unattended Firmware ISO file (optional, change default value to meet your environment).
 .EXAMPLE
 	.\Upgrade-IMMServerFirmware.ps1 '10.98.1.150'
-.EXAMPLE
-	$immCred = Get-Credential -UserName yourlogin -Message "IMM credentials"
-	.\Upgrade-IMMServerFirmware.ps1 -IMM '10.98.1.150' -IMMCred $immCred
 .EXAMPLE
 	$immCred = Get-Credential -UserName yourlogin -Message "IMM credentials"
 	.\Upgrade-IMMServerFirmware.ps1 -IMM '10.98.1.150' -IMMCred $immCred `
@@ -27,7 +27,7 @@
 .NOTES
 	Author: Roman Gelman
 .LINK
-	https://github.com/rgel/PowerShell/tree/master/IMM-Module
+	https://github.com/rgel/PowerShell/IMM-Module
 #>
 
 #region Params
@@ -36,39 +36,28 @@
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,HelpMessage = "IMM Supervisor Credentials"
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Credentials")]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
-	[System.Management.Automation.PSCredential]$IMMCred = (Get-Credential -UserName customLoginID -Message "IMM Supervisor Login")
+	[System.Management.Automation.PSCredential]$IMMCred = (Get-Credential -UserName ribadmin -Message "IMM Supervisor Login")
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,HelpMessage = 'Firmware upgrade process log file (txt|log)'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage='Firmware upgrade process log file (txt|log)')]
 		[ValidatePattern('(txt$|log$)')]
 		[ValidateScript({Test-Path -Path (Split-Path -Path $_) -PathType Container})]
 		[Alias("Log")]
 	[System.String]$IMMLog = "E:\sh\IBM\immUpgrade.log"
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,HelpMessage = 'Generic IMM config file (csv)'
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage='Generic IMM config file (csv)')]
 		[ValidatePattern('csv$')]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("Config")]
 	[System.String]$IMMConfig = "E:\sh\IBM\immSettings.csv"
 	,
-	[Parameter(
-		Mandatory=$false,Position=4,HelpMessage = 'BoMC prepared unattended Firmware ISO file'
-		)]
+	[Parameter(Mandatory=$false,Position=4,HelpMessage='BoMC prepared unattended Firmware ISO file')]
 		[ValidatePattern('iso$')]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ISO")]
@@ -76,18 +65,6 @@ Param (
 )
 
 #endregion Params
-
-#region Load Modules
-
-$psModules = @('IMM-Module')
-Try {
-	Foreach ($psModule in $psModules) {
-		If ((Get-Module -Name $psModule -ErrorAction SilentlyContinue) -eq $null) {Import-Module -Name $psModule -Force -ErrorAction Stop}
-	}
-}
-Catch {{"`n$($_.Exception.Message)"; Exit 1}}
-
-#endregion Load Modules
 
 #region Functions
 
