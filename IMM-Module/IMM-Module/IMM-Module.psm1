@@ -2,12 +2,25 @@
 .NOTES
 	IMM-Module CHANGELOG
 	
-	1.1 - 27/05/2015 - Function Improvements
+	1.2 - 23/07/2015
+
+		CHANGE:					Content-based help Improvements.
+		AFFECTED FUNCTIONS:		ALL.
+		DESCRIPTION:			".PARAMETER" tags edited.
+		
+		CHANGE:					Bugfix.
+		AFFECTED FUNCTIONS:		All functions that support '-Confirm' parameter.
+		DESCRIPTION:			'$IMM' variable replaced with '$module' in $PSCmdlet.ShouldProcess($module,"") method.
 	
-		(1) Functions:	Get-IMMISO, Mount-IMMISO
-			Changes:	Added 'rdmount' running process check in the 'Begin' scope before function call;
-		(2)	Function:	Set-IMMServerBootOrder
-			Changes:	Added 'Windows Boot Manager' entry in [ValidateSet()] statement for all Boot devices;
+	1.1 - 27/05/2015
+		
+		CHANGE:					Function Improvements.
+		AFFECTED FUNCTIONS:		Get-IMMISO, Mount-IMMISO.
+		DESCRIPTION:			Added 'rdmount' running process check in the 'Begin' scope before function call.
+		
+		CHANGE:					Function Improvements.
+		AFFECTED FUNCTIONS:		Set-IMMServerBootOrder.
+		DESCRIPTION:			Added 'Windows Boot Manager' entry in [ValidateSet()] statement for all Boot devices.
 	
 	1.0 - 17/05/2015 - Initial release
 #>
@@ -39,16 +52,16 @@ Function Get-IMMServerPowerState {
     This function retrives IBM server's Powerstate.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Get-IMMServerPowerState esxhai1r -IMMCred (Get-Credential -UserName yourlogin -Message "IMM credentials")
 .EXAMPLE
@@ -75,46 +88,28 @@ Function Get-IMMServerPowerState {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -175,16 +170,16 @@ Function Start-IMMServer {
     This function Power On IBM server.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Start-IMMServer esxhai1r -IMMCred (Get-Credential -UserName yourlogin -Message "IMM credentials")
 .EXAMPLE
@@ -211,46 +206,28 @@ Function Start-IMMServer {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -308,16 +285,16 @@ Function Shutdown-IMMServerOS {
     This function Shutdown IBM server's Operating System.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Shutdown-IMMServerOS esxhai1r -IMMCred (Get-Credential -UserName yourlogin -Message "IMM credentials")
 .EXAMPLE
@@ -344,46 +321,28 @@ Function Shutdown-IMMServerOS {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -405,7 +364,7 @@ Process {
 
 	Foreach ($module in $IMM) {
 	
-		If ($PSCmdlet.ShouldProcess($IMM,"Shutdown OS and Poweroff Server")) {
+		If ($PSCmdlet.ShouldProcess($module,"Shutdown OS and Poweroff Server")) {
 	
 			$ASUCmd       = "immapp Poweroffos"
 			$ASUCmdLine   = "$ASUExec $ASUCmd --host $module --user $IMMLogin --password $IMMPwd"
@@ -444,16 +403,16 @@ Function Reboot-IMMServerOS {
     This function Reboot IBM server's Operating System.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Reboot-IMMServerOS esxhai1r -IMMCred (Get-Credential -UserName yourlogin -Message "IMM credentials")
 .EXAMPLE
@@ -480,46 +439,28 @@ Function Reboot-IMMServerOS {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -541,7 +482,7 @@ Process {
 
 	Foreach ($module in $IMM) {
 	
-		If ($PSCmdlet.ShouldProcess($IMM,"Restart OS and Reboot Server")) {
+		If ($PSCmdlet.ShouldProcess($module,"Restart OS and Reboot Server")) {
 	
 			$ASUCmd       = "immapp Rebootos"
 			$ASUCmdLine   = "$ASUExec $ASUCmd --host $module --user $IMMLogin --password $IMMPwd"
@@ -580,16 +521,16 @@ Function Restart-IMM {
     This function Restart IMM card itself.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Restart-IMM esxhai1r -IMMCred (Get-Credential -UserName yourlogin -Message "IMM credentials")
 .EXAMPLE
@@ -616,46 +557,28 @@ Function Restart-IMM {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -677,7 +600,7 @@ Process {
 
 	Foreach ($module in $IMM) {
 	
-		If ($PSCmdlet.ShouldProcess($IMM,"Restart IMM")) {
+		If ($PSCmdlet.ShouldProcess($module,"Restart IMM")) {
 	
 			$ASUCmd       = "rebootimm"
 			$ASUCmdLine   = "$ASUExec $ASUCmd --host $module --user $IMMLogin --password $IMMPwd"
@@ -716,16 +639,16 @@ Function Get-IMMInfo {
     This function retrives IBM server's IMM Info.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Get-IMMInfo esxhai1r
 .EXAMPLE
@@ -754,46 +677,28 @@ Function Get-IMMInfo {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -873,16 +778,16 @@ Function Get-IMMSettings {
     This function retrives full list of IBM server's IMM settings.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Get-IMMSettings esxhai1r
 .EXAMPLE
@@ -908,46 +813,28 @@ Function Get-IMMSettings {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -1014,16 +901,16 @@ Function Get-IMMParam {
     This function retrives IBM server's IMM single parameter from allowed parameters set.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .PARAMETER Param/Key
 	Single IMM's Parameter (Time Zone or DNS for example).
 .EXAMPLE
@@ -1053,55 +940,34 @@ Function Get-IMMParam {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
 	[System.String]$ASUExec = $ASU
 	,
-	[Parameter(
-		Mandatory=$true,Position=4,
-		HelpMessage = "IMM Parameter"
-		)]
+	[Parameter(Mandatory=$true,Position=4,HelpMessage="IMM Parameter")]
 		[ValidateSet('DNS_IP_Address1','DNS_IP_Address2','DST','GatewayIPAddress1','HostIPAddress1', `
 		'HostIPSubnet1','NTPAutoSynchronization','NTPHost','NTPHost1','TimeZone','LoginId.1','LoginId.2', `
 		'AuthorityLevel.1','AuthorityLevel.2','IMMInfo_Contact','IMMInfo_Location')]
@@ -1172,16 +1038,16 @@ Function Set-IMMParam {
     This function set IBM server's IMM single parameter from allowed parameters set.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .PARAMETER Param/Key
 	Single IMM's Parameter (Time Zone or DNS for example).
 .PARAMETER Value/ParamValue (optional, default is empty string)
@@ -1237,55 +1103,34 @@ Function Set-IMMParam {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
 	[System.String]$ASUExec = $ASU
 	,
-	[Parameter(
-		Mandatory=$true,Position=4,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM Parameter"
-		)]
+	[Parameter(Mandatory=$true,Position=4,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM Parameter")]
 		[ValidateSet('DNS_IP_Address1','DNS_IP_Address2','DST','GatewayIPAddress1', `
 		'HostIPSubnet1','NTPAutoSynchronization','NTPHost','NTPHost1','TimeZone','LoginId.1','LoginId.2', `
 		'AuthorityLevel.1','AuthorityLevel.2','Password.1','Password.2','IMMInfo_Name','HostName1', `
@@ -1293,10 +1138,7 @@ Param (
 		[Alias("Key")]
 	[System.String]$Param
 	,
-	[Parameter(
-		Mandatory=$false,Position=5,
-		HelpMessage = "IMM Parameter's Value"
-		)]
+	[Parameter(Mandatory=$false,Position=5,HelpMessage="IMM Parameter's Value")]
 	[System.String]$Value = ''
 )
 
@@ -1318,7 +1160,7 @@ Process {
 	
 	Foreach ($module in $IMM) {
 	
-		If ($PSCmdlet.ShouldProcess($IMM,"Set parameter '$Param' to value '$Value'")) {
+		If ($PSCmdlet.ShouldProcess($module,"Set parameter '$Param' to value '$Value'")) {
 			
 			$ASUCmd       = "set IMM.$Param $Value"
 			$ASUCmdLine   = "$ASUExec $ASUCmd --host $module --user $IMMLogin --password $IMMPwd"
@@ -1374,16 +1216,16 @@ Function Get-IMMSystemEventLog {
     This function retrives IBM server's System Event Log.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Get-IMMSystemEventLog esxhai1r
 .EXAMPLE
@@ -1414,46 +1256,28 @@ Function Get-IMMSystemEventLog {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -1531,16 +1355,16 @@ Function Clear-IMMSystemEventLog {
     This function clear (delete all entries) IBM server's System Event Log.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Clear-IMMSystemEventLog "10.98.1.153"
 .EXAMPLE
@@ -1573,46 +1397,28 @@ Function Clear-IMMSystemEventLog {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -1634,7 +1440,7 @@ Process {
 	
 	Foreach ($module in $IMM) {
 	
-		If ($PSCmdlet.ShouldProcess($IMM,"Clear System Event Log")) {
+		If ($PSCmdlet.ShouldProcess($module,"Clear System Event Log")) {
 		
 			$ASUCmd       = "immapp Clearsel"
 			$ASUCmdLine   = "$ASUExec $ASUCmd --host $module --user $IMMLogin --password $IMMPwd"
@@ -1667,16 +1473,16 @@ Function Get-IMMSystemEventLogEntries {
     This function retrives IBM server's System Event Log Entries.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Get-IMMSystemEventLogEntries esxhai1r
 .EXAMPLE
@@ -1706,46 +1512,28 @@ Function Get-IMMSystemEventLogEntries {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -1830,26 +1618,17 @@ Function Get-IMMSubnet {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,
-		HelpMessage = "Class C network subnet"
-		)]
+	[Parameter(Mandatory=$true,Position=0,HelpMessage="Class C network subnet")]
 		[ValidatePattern("^(?<A>2[0-4]\d|25[0-5]|[01]?\d\d?)\.(?<B>2[0-4]\d|25[0-5]|[01]?\d\d?)\.(?<C>2[0-4]\d|25[0-5]|[01]?\d\d?)\.(?<D>0)$")]
 		[Alias("Network")]
 	[System.String]$Subnet
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "First IP address in range"
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="First IP address in range")]
 		[ValidateRange(1,253)]
 		[Alias("FirstIP")]
 	[System.Int32]$StartIP = 1
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "Last IP address in range"
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="Last IP address in range")]
 		[ValidateRange(2,254)]
 		[Alias("LastIP")]
 	[System.Int32]$EndIP = 254
@@ -1876,14 +1655,14 @@ Function Connect-IMMSSH {
     Open SSH session to IMM with plink.exe in PoSh window.
 .DESCRIPTION
     This function opens SSH session to IMM with plink.exe in the PowerShell console.
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
 .PARAMETER Plink (optional, default set by '$Plink' variable)
 	Plink executable full path.
 .EXAMPLE
@@ -1903,46 +1682,28 @@ Function Connect-IMMSSH {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "Plink SSH/SFTP client executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="Plink SSH/SFTP client executable full path")]
 		[ValidatePattern("^plink\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("PlinkExecutable")]
@@ -1976,16 +1737,16 @@ Function Get-IMMServerBootOrder {
     This function retrives IBM server's UEFI Boot Order.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Get-IMMServerBootOrder esxhai1r
 .EXAMPLE
@@ -2011,46 +1772,28 @@ Function Get-IMMServerBootOrder {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -2125,16 +1868,16 @@ Function Set-IMMServerBootOrder {
     This function set IBM server's UEFI Boot Order.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .PARAMETER Boot1 (optional, default is 'CD/DVD Rom')
 	First Boot Device
 .PARAMETER Boot2 (optional, default is 'Floppy Disk')
@@ -2172,76 +1915,46 @@ Function Set-IMMServerBootOrder {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
 	[System.String]$ASUExec = $ASU
 	,
-	[Parameter(
-		Mandatory=$false,Position=4,
-		HelpMessage = "First boot device"
-		)]
+	[Parameter(Mandatory=$false,Position=4,HelpMessage="First boot device")]
 		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI')]
 	[System.String]$Boot1 = 'CD/DVD Rom'
 	,
-	[Parameter(
-		Mandatory=$false,Position=5,
-		HelpMessage = "Second boot device"
-		)]
+	[Parameter(Mandatory=$false,Position=5,HelpMessage="Second boot device")]
 		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI')]
 	[System.String]$Boot2 = 'Floppy Disk'
 	,
-	[Parameter(
-		Mandatory=$false,Position=6,
-		HelpMessage = "Third boot device"
-		)]
+	[Parameter(Mandatory=$false,Position=6,HelpMessage="Third boot device")]
 		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI')]
 	[System.String]$Boot3 = 'Hard Disk 0'
 	,
-	[Parameter(
-		Mandatory=$false,Position=7,
-		HelpMessage = "Fourth boot device"
-		)]
+	[Parameter(Mandatory=$false,Position=7,HelpMessage="Fourth boot device")]
 		[ValidateSet('CD/DVD Rom','Floppy Disk','Hard Disk 0','PXE Network','Windows Boot Manager','VDIESXi5.5','ESXi5VDI','')]
 	[System.String]$Boot4 = 'PXE Network'
 	
@@ -2269,7 +1982,7 @@ Process {
 	
 	Foreach ($module in $IMM) {
 	
-		If ($PSCmdlet.ShouldProcess($IMM,"Change Server Boot Order")) {
+		If ($PSCmdlet.ShouldProcess($module,"Change Server Boot Order")) {
 		
 			$ASUCmd       = "set BootOrder.BootOrder $bdev1$sign$bdev2$sign$bdev3$sign$bdev4"
 			$ASUCmdLine   = "$ASUExec $ASUCmd --host $module --user $IMMLogin --password $IMMPwd"
@@ -2324,14 +2037,14 @@ Function Mount-IMMISO {
 .DESCRIPTION
 	This function mount ISO file to IBM server's Virtual Media Drive.
 	On IMM2 requires IBM FoD "Advanced Upgrade" license key!
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
 .PARAMETER RDMExec/RDMExecutable (optional, default set by '$RDM' variable)
 	IBM Remote Disk CLI executable full path.
 .PARAMETER ISO/MountISO
@@ -2359,55 +2072,34 @@ Function Mount-IMMISO {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM RDCLI executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM RDCLI executable full path")]
 		[ValidatePattern("^rdmount\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("RDMExecutable")]
 	[System.String]$RDMExec = $RDM
 	,
-	[Parameter(
-		Mandatory=$true,Position=4,
-		HelpMessage = "ISO file to mount"
-		)]
+	[Parameter(Mandatory=$true,Position=4,HelpMessage="ISO file to mount")]
 		[ValidatePattern("^.+\.iso$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("MountISO")]
@@ -2477,14 +2169,14 @@ Function Get-IMMISO {
 .DESCRIPTION
 	This function query is ISO file mounted to IBM server's Virtual Media Drive.
 	On IMM2 requires IBM FoD "Advanced Upgrade" license key!
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
 .PARAMETER RDMExec/RDMExecutable (optional, default set by '$RDM' variable)
 	IBM Remote Disk CLI executable full path.
 .EXAMPLE
@@ -2509,46 +2201,28 @@ Function Get-IMMISO {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM RDCLI executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM RDCLI executable full path")]
 		[ValidatePattern("^rdmount\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("RDMExecutable")]
@@ -2590,7 +2264,7 @@ Function Unmount-IMMISO {
 .DESCRIPTION
 	This function unmount ISO file from IBM server's Virtual Media Drive via IMM.
 	On IMM2 requires IBM FoD "Advanced Upgrade" license key!
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
 .PARAMETER RDUExec/RDUExecutable (optional, default set by '$RDU' variable)
 	IBM Remote Disk CLI executable full path.
@@ -2611,19 +2285,13 @@ Function Unmount-IMMISO {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IBM RDCLI executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IBM RDCLI executable full path")]
 		[ValidatePattern("^rdumount\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("RDUExecutable")]
@@ -2661,16 +2329,16 @@ Function Get-IMM2FoDKeys {
     This function retrives IBM server's Feature-on-Demand (FoD) License Keys.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
 .EXAMPLE
 	Get-IMM2FoDKeys "10.99.1.136"
 .EXAMPLE
@@ -2701,46 +2369,28 @@ Function Get-IMM2FoDKeys {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String[]]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
@@ -2813,18 +2463,18 @@ Function Add-IMM2FoDKey {
     This function install IBM server's Feature-on-Demand (FoD) License Key.
 	Function outputs PoSh-objects with Properties that may be filtered by Where-Object Cmdlet,
 	sorted by Sort-Object and formatted by Select-Object,ft,fl,fw (please see Examples).
-.PARAMETER IMM/IMMHost/IMMIP
+.PARAMETER IMM
     IMM DNS name or IP address.
-.PARAMETER IMMLogin (optional, if ommited used IBM default 'USERID')
-    IMM Supervisor Login ID.
-.PARAMETER IMMPwd (optional, if ommited used IBM default 'PASSW0RD')
-	IMM Supervisor Login ID Password.
-.PARAMETER IMMCred (Get-Credential Cmdlet object)
-	IMM Supervisor Credentials.
-.PARAMETER ASUExec/ASUExecutable (optional, default set by '$ASU' variable)
-	IBM ASU executable full path.
-.PARAMETER LicenseKey/Key
-	IMM2 Fod License Key file
+.PARAMETER IMMLogin
+    IMM Supervisor Login ID (optional, if ommited used IBM default 'USERID').
+.PARAMETER IMMPwd
+	IMM Supervisor Login ID Password (optional, if ommited used IBM default 'PASSW0RD').
+.PARAMETER IMMCred
+	IMM Supervisor Credentials (Get-Credential Cmdlet object).
+.PARAMETER ASUExec
+	IBM ASU executable full path (optional, default set by '$ASU' variable).
+.PARAMETER LicenseKey
+	IMM2 Fod License Key file.
 .EXAMPLE
 	Add-IMM2FoDKey "10.99.1.136" -LicenseKey 'C:\FoD\ibm_fod_0001_7915KD6A3V7_anyos_noarch.key'
 .EXAMPLE
@@ -2837,7 +2487,7 @@ Function Add-IMM2FoDKey {
 .LINK
 	https://github.com/rgel/PowerShell/IMM-Module
 .OUTPUTS
-	All currently installed keys.
+	All currently installed FoD licene keys.
 	Collection of PSObjects with 7 Properties: IMM,Num,KeyID,Status,LicensedFoD,RemindUser,ExpiredDate or $null.
 	The major reasons for $null are bad credentials or
 	specified Login ID doesn't have supervisor rights on IMM or
@@ -2848,55 +2498,34 @@ Function Add-IMM2FoDKey {
 
 Param (
 
-	[Parameter(
-		Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,
-		HelpMessage = "IMM DNS name or IP address"
-		)]
+	[Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="IMM DNS name or IP address")]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMHost")]
 		[Alias("IMMIP")]
 	[System.String]$IMM
 	,
-	[Parameter(
-		Mandatory=$false,Position=1,
-		HelpMessage = "IMM Supervisor Login ID",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=1,HelpMessage="IMM Supervisor Login ID",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMUser")]
 	[System.String]$IMMLogin = "USERID"
 	,
-	[Parameter(
-		Mandatory=$false,Position=2,
-		HelpMessage = "IMM Supervisor Login ID Password",
-		ParameterSetName='USERPWDPAIR'
-		)]
+	[Parameter(Mandatory=$false,Position=2,HelpMessage="IMM Supervisor Login ID Password",ParameterSetName='USERPWDPAIR')]
 		[ValidateNotNullorEmpty()]
 		[Alias("IMMPassword")]
 	[System.String]$IMMPwd = "PASSW0RD"
 	,
-	[Parameter(
-		Mandatory=$true,Position=1,
-		HelpMessage = "IMM Supervisor Credentials",
-		ParameterSetName='CREDOBJ'
-		)]
+	[Parameter(Mandatory=$true,Position=1,HelpMessage="IMM Supervisor Credentials",ParameterSetName='CREDOBJ')]
 		[ValidateNotNullorEmpty()]
 		[Alias("Credentials")]
 	[System.Management.Automation.PSCredential]$IMMCred
 	,
-	[Parameter(
-		Mandatory=$false,Position=3,
-		HelpMessage = "IBM ASU executable full path"
-		)]
+	[Parameter(Mandatory=$false,Position=3,HelpMessage="IBM ASU executable full path")]
 		[ValidatePattern("^asu\d*\.exe$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("ASUExecutable")]
 	[System.String]$ASUExec = $ASU
 	,
-	[Parameter(
-		Mandatory=$true,Position=4,
-		HelpMessage = "IMM2 Feature-on-Demand License Key"
-		)]
+	[Parameter(Mandatory=$true,Position=4,HelpMessage="IMM2 Feature-on-Demand License Key")]
 		[ValidatePattern("^.+\.key$")]
 		[ValidateScript({Test-Path -Path FileSystem::$_ -PathType Leaf})]
 		[Alias("Key")]
