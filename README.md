@@ -1,5 +1,9 @@
-# PowerShell
+# PowerShell Repo
 
-http://rgel75.wix.com/blog
+### </b><ins>SysAdminTools</ins></b>
 
-https://twitter.com/rgelman75
+##### <ins>Scripts:</ins>
+
+###### <b>1. [Get-NetStat.ps1</b>] (http://www.lazywinadmin.com/2014/08/powershell-parse-this-netstatexe.html)
+
+"Netstat.exe" regex parser.
