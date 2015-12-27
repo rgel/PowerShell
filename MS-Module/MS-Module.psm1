@@ -35,7 +35,7 @@ Filter Get-OUTree {
 .NOTES
 	Author: Roman Gelman.
 .LINK
-	https://github.com/rgel/PowerShell
+	https://goo.gl/wOzNOe
 #>
 
 Param ([Switch]$IncludeDomainName)
