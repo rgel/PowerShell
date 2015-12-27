@@ -1,7 +1,7 @@
 # PowerShell Repo
 ## Scripts & Modules
 
-### </b><ins>Get-NetStat.ps1</ins></b>
+### </b><ins>[Get-NetStat.ps1</ins></b>] (https://github.com/rgel/PowerShell/blob/master/SysAdminTools/Get-NetStat.ps1)
 
 ###### <b>["Netstat.exe" regex parser</b>] (http://www.lazywinadmin.com/2014/08/powershell-parse-this-netstatexe.html)
 
