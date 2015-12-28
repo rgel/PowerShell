@@ -29,10 +29,12 @@ For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [
 
 This filter convert AD object's 'DistinguishedName' property to path-like format.
 
+Active Directory hierarchy view like this: 'Domainname\TopLevelOU\North\HR' or without domain name 'TopLevelOU\North\HR'.
+
 ![Get-OUTree] (https://cloud.githubusercontent.com/assets/6964549/12010335/a72f9cb2-acaa-11e5-8eba-73809251137c.png)
 
 You can pipe to the filter objects, returned by following ActiveDirectory Module's cmdlets:
 
-`Get-ADUser`, `Get-ADGroup`, `Get-ADGroupMember`, `Get-ADComputer`, `Get-ADDomainController`, `Get-ADOject` or string, that contains 'DistinguishedName'.
+`Get-ADUser`, `Get-ADGroup`, `Get-ADGroupMember`, `Get-ADComputer`, `Get-ADDomainController`, `Get-ADOject`, `Get-ADOrganizationalUnit` or string, that contains 'DistinguishedName'.
 
 See content based help for more examples: `Get-Help Get-OUTree -Examples`.
