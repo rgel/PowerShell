@@ -122,7 +122,7 @@ Function Write-Menu {
 Param (
 
 	[Parameter(Mandatory,Position=0)]
-		[Alias("MenuEntry","List","Name")]
+		[Alias("MenuEntry","List")]
 	$Menu
 	,
 	[Parameter(Mandatory=$false,Position=1)]
