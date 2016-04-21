@@ -38,3 +38,7 @@ You can pipe to the filter objects, returned by following ActiveDirectory Module
 `Get-ADUser`, `Get-ADGroup`, `Get-ADGroupMember`, `Get-ADComputer`, `Get-ADDomainController`, `Get-ADOject`, `Get-ADOrganizationalUnit` or string, that contains 'DistinguishedName'.
 
 See content based help for more examples: `Get-Help Get-OUTree -Examples`.
+
+###### <b>2. [Write-Menu</b>] (http://goo.gl/MgLch1)
+
+This function creates colored, interactive and dynamic Menu in the PowerShell console.
