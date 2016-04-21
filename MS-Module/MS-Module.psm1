@@ -114,7 +114,7 @@ Function Write-Menu {
 	Author       ::	Roman Gelman.
 	Version 1.0  ::	21-Apr-2016  :: Release.
 .LINK
-	https://goo.gl/wOzNOe
+	http://goo.gl/MgLch1
 #>
 
 [CmdletBinding()]
