@@ -1,4 +1,4 @@
-Filter Get-OUTree {
+Filter Get-OUPath {
 
 <#
 .SYNOPSIS
@@ -6,68 +6,97 @@ Filter Get-OUTree {
 .DESCRIPTION
 	This filter convert Active Directory object's 'DistinguishedName' property to path-like format.
 	Active Directory hierarchy view like this: 'Domainname\TopLevelOU\North\HR' or without domain name 'TopLevelOU\North\HR'.
+.PARAMETER IncludeDomainName
+	If ommited doesn't include Domain Name to the path.
+	Useful in multi domain forests.
+.PARAMETER ExcludeObjectName
+	If ommited include object name in the path.
+.PARAMETER UCaseDomainName
+	Convert Domain Name to UPPERCASE, otherwise only the capital letter is uppercased.
+	contoso -> CONTOSO -> Contoso.
+	Does nothing if 'IncludeDomainName' ommited.
 .EXAMPLE
-	C:\PS> Get-ADUser user1 |Get-OUTree
+	PS C:\> Get-ADUser user1 |Get-OUPath
 .EXAMPLE
-	C:\PS> Get-ADUser -Filter {SamAccountName -like 'user*'} |select Name,@{N='OUTree';E={$_.DistinguishedName |Get-OUTree}}
-	Add calculated property 'OUTree' to existing objects.
-	This technique will work with all types of objects (users/computers/groups/OU).
+	PS C:\> Get-ADUser -Filter {SamAccountName -like 'user*'} |select Name,@{N='OUPath';E={$_.DistinguishedName |Get-OUPath}}
+	Add calculated property 'OUPath' to existing objects.
+	This technique will work with all types of objects (users/computers/groups/OU etc).
 .EXAMPLE
-	C:\PS> Get-ADGroup -Filter {SamAccountName -like 'hr*'} |select Name,@{N='OUTree';E={$_.DistinguishedName |Get-OUTree -IncludeDomainName}} |ft -au
+	PS C:\> Get-ADGroup -Filter {SamAccountName -like 'hr*'} |select Name,@{N='OUPath';E={$_.DistinguishedName |Get-OUPath -IncludeDomainName}} |ft -au
 .EXAMPLE
-	C:\PS> Get-ADGroupMember HR |select Name,@{N='OUTree';E={$_.DistinguishedName |Get-OUTree}} |sort OUTree,Name |ft -au
+	PS C:\> Get-ADGroupMember HR |select Name,@{N='OUPath';E={$_.DistinguishedName |Get-OUPath}} |sort OUPath,Name |ft -au
 .EXAMPLE
-	C:\PS> Get-ADOrganizationalUnit -Filter {Name -like 'North'} |select @{N='DN';E={$_}},@{N='OUTree';E={$_ |Get-OUTree -IncludeDomainName}} |sort DN
+	PS C:\> Get-ADOrganizationalUnit -Filter {Name -like 'North*'} |select @{N='DN';E={$_}},@{N='OUPath';E={$_ |Get-OUPath -IncludeDomainName}} |sort DN
 .EXAMPLE
-	C:\PS> $dn1 = 'CN=User1,OU=HR,OU=Northwest,OU=North,DC=World,DC=co,DC=il'
-	C:\PS> $dn2 = 'CN=User2,CN=Users,DC=World,DC=co,DC=il'
-	C:\PS> $dn3 = 'CN=Server1,CN=Computers,DC=World,DC=co,DC=il'
-	C:\PS> $dn4 = 'OU=Northwest,OU=North,DC=World,DC=co,DC=il'
-	C:\PS> $dn1,$dn2,$dn3,$dn4 |Get-OUTree -IncludeDomainName
-	These four DNs for the different AD object types (User/User in the default 'Users' container/Computer/Organizational Unit).
+	PS C:\> $DNs = @()
+	PS C:\> $DNs += 'CN=User1,OU=HR,OU=Northwest,OU=North,DC=contoso,DC=co,DC=il'
+	PS C:\> $DNs += 'CN=User2,CN=Users,DC=contoso,DC=co,DC=il'
+	PS C:\> $DNs += 'CN=Server1,CN=Computers,DC=contoso,DC=co,DC=il'
+	PS C:\> $DNs += 'OU=Northwest,OU=north,DC=contoso,DC=co,DC=il'
+	PS C:\> $DNs += 'OU=TopLevelOU,DC=contoso,DC=co,DC=il'
+	PS C:\> $DNs |select @{N='DN';E={$_}},@{N='OUPath';E={$_ |Get-OUPath -IncludeDomainName}}
+	These DNs for the different AD object types: User, User in the default 'Users' container, Computer, OU and top level OU.
+.EXAMPLE
+	PS C:\> Get-ADDomainController -Filter * |Get-OUPath -IncludeDomainName
 .INPUTS
 	[Microsoft.ActiveDirectory.Management.ADUser[]]               Active Directory user objects, returned by Get-ADUser cmdlet.
 	[Microsoft.ActiveDirectory.Management.ADGroup[]]              Active Directory group objects, returned by Get-ADGroup cmdlet.
 	[Microsoft.ActiveDirectory.Management.ADPrincipal[]]          Active Directory objects, returned by Get-ADGroupMember cmdlet.
 	[Microsoft.ActiveDirectory.Management.ADComputer[]]           Active Directory computer objects, returned by Get-ADComputer cmdlet.
-	[Microsoft.ActiveDirectory.Management.ADDomainController]     Active Directory DC object, returned by Get-ADDomainController cmdlet.
+	[Microsoft.ActiveDirectory.Management.ADDomainController[]]   Active Directory DC objects, returned by Get-ADDomainController cmdlet.
 	[Microsoft.ActiveDirectory.Management.ADObject[]]             Active Directory objects, returned by Get-ADObject cmdlet.
-	[Microsoft.ActiveDirectory.Management.ADOrganizationalUnit[]] Active Directory OU object, returned by Get-ADOrganizationalUnit cmdlet.
-	Because the object itself is not included in the report, for top level OU containers empty string is returned.
-	[System.String[]] Strings that represent any object's 'DistinguishedName' property.
+	[Microsoft.ActiveDirectory.Management.ADOrganizationalUnit[]] Active Directory OU objects, returned by Get-ADOrganizationalUnit cmdlet.
+	[System.String[]]                                             Strings that represent any object's 'DistinguishedName' property.
+	Or any object that have 'DistinguishedName' property.
 .OUTPUTS
 	[System.String[]]
+	If you use '-ExcludeObjectName' switch without '-IncludeDomainName'
+	both the object itself and a domain name are not included in the returned string
+	and you will get EMPTY path for TOP LEVEL OU containers.
 .NOTES
 	Author: Roman Gelman.
-	Version 1.0 :: 27-Dec-2015 :: Release     ::
-	Version 1.1 :: 28-Dec-2015 :: Improvement :: Regex edited to support 'ADOrganizationalUnit' objects itself.
+	Version 1.0 :: 18-May-2016 :: Release :: This function was fully rewrited from the original 'Get-OUTree'.
 .LINK
 	https://goo.gl/wOzNOe
 #>
 
-Param ([Switch]$IncludeDomainName)
+Param ([switch]$IncludeDomainName,[switch]$ExcludeObjectName,[switch]$UCaseDomainName)
 
-If ($IncludeDomainName)	{
-	$rgxUserDN2OU = '(?i)^(cn|ou)=.+?,(?<OUTree>(ou=.+?|cn=.+?),dc=.+?),'
-	$rgxGNum      = 3
-} Else {
-	$rgxUserDN2OU = '(?i)^(cn|ou)=.+?,(?<OUTree>ou=.+?|cn=.+?),dc='
-	$rgxGNum      = 2
-}
+	If     ($_.GetType().Name -eq 'string')             {$DN = $_}
+	ElseIf ($_.GetType().Name -eq 'ADDomainController') {$DN = $_.ComputerObjectDN}
+	Else                                                {$DN = $_.DistinguishedName}
 
-Try
-	{
-		If ($_.GetType().Name -eq 'string') {$DN = $_} ElseIf ($_.GetType().Name -eq 'ADDomainController') {$DN = $_.ComputerObjectDN} Else {$DN = $_.DistinguishedName}
-		$arrOU = [Regex]::Match($DN, $rgxUserDN2OU).Groups[$rgxGNum].Value -replace ('ou=|cn=|dc=', $null) -split (',')
-		[Array]::Reverse($arrOU)
-		return $arrOU -join ('\')
+	If ($IncludeDomainName)	{
+		If ($ExcludeObjectName) {
+			### Top level OU ###
+			If (($DN -split ',')[1].ToLower().StartsWith('dc=')) {$rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>dc=.+?),'}
+			### Non top level OU ###
+			Else                                                 {$rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>(ou=.+?|cn=.+?),dc=.+?),'}
+		}
+		Else {
+			$rgxDN2OU = '(?i)^(?<OUPath>(ou=.+?|cn=.+?),dc=.+?),'
+		}
 	}
-Catch 
-	{
-		return $null
+	Else {
+		If ($ExcludeObjectName) {$rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>ou=.+?|cn=.+?),dc='}
+		Else                    {$rgxDN2OU = '(?i)^(?<OUPath>ou=.+?|cn=.+?),dc='}
 	}
+
+	Try
+		{
+			$arrOU = [regex]::Match($DN, $rgxDN2OU).Groups['OUPath'].Value -replace ('ou=|cn=|dc=', $null) -split (',')
+			[array]::Reverse($arrOU)
+			If ($IncludeDomainName) {
+				If ($UCaseDomainName) {$Domain = $arrOU[0].ToUpper()}
+				Else                  {$Domain = (Get-Culture).TextInfo.ToTitleCase($arrOU[0])}
+				If ($arrOU.Length -gt 1) {return $Domain + '\' + ($arrOU[1..($arrOU.Length-1)] -join ('\'))} Else {return $Domain}
+			}
+			Else {return $arrOU -join ('\')}
+		}
+	Catch 
+		{return $null}
 	
-} #EndFilter Get-OUTree
+} #EndFilter Get-OUPath
 
 Function Write-Menu {
 
