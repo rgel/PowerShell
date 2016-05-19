@@ -25,19 +25,11 @@ For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [
 
 ##### <ins>Cmdlets:</ins>
 
-###### <b>1. Get-OUTree</b>
+###### <b>1. Get-OUPath</b>
 
-This filter convert AD object's 'DistinguishedName' property to path-like format.
+This filter convert AD object's 'DistinguishedName' property to path like format.
 
-Active Directory hierarchy view like this: `Domainname\TopLevelOU\ParentOU\ChildOU` or without domain name `TopLevelOU\ParentOU\ChildOU`.
-
-![Get-OUTree] (https://cloud.githubusercontent.com/assets/6964549/12010335/a72f9cb2-acaa-11e5-8eba-73809251137c.png)
-
-You can pipe to the filter objects, returned by following ActiveDirectory Module's cmdlets:
-
-`Get-ADUser`, `Get-ADGroup`, `Get-ADGroupMember`, `Get-ADComputer`, `Get-ADDomainController`, `Get-ADOject`, `Get-ADOrganizationalUnit` or string, that contains 'DistinguishedName'.
-
-See content based help for more examples: `Get-Help Get-OUTree -Examples`.
+Distinguished name `CN=User1,OU=Sales,OU=North,DC=contoso,DC=com` = `Contoso\North\Sales\User1` in path format.
 
 ###### <b>2. [Write-Menu</b>] (http://goo.gl/MgLch1)
 
