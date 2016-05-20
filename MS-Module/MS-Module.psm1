@@ -57,7 +57,7 @@ Filter Get-OUPath {
 	Author: Roman Gelman.
 	Version 1.0 :: 18-May-2016 :: Release :: This function was fully rewrited from the original 'Get-OUTree'.
 .LINK
-	https://goo.gl/wOzNOe
+	http://goo.gl/NwlePh
 #>
 
 Param ([switch]$IncludeDomainName,[switch]$ExcludeObjectName,[switch]$UCaseDomainName)
