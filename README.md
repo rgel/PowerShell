@@ -25,7 +25,7 @@ For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [
 
 ##### <ins>Cmdlets:</ins>
 
-###### <b>1. Get-OUPath</b>
+###### <b>1. Get-OUPath</b> (http://goo.gl/NwlePh)
 
 This filter convert AD object's 'DistinguishedName' property to path like format.
 
