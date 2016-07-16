@@ -5,6 +5,10 @@
 
 ###### <b>["Netstat.exe" regex parser</b>] (http://www.lazywinadmin.com/2014/08/powershell-parse-this-netstatexe.html)
 
+### </b><ins>[Get-MOTD.ps1</ins></b>] (https://github.com/rgel/PowerShell/blob/master/Get-MOTD.ps1)
+
+###### <b>[Edited version of Get-MOTD.ps1 by Michal Millar</b>] (http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell)
+
 ### </b><ins>[MS-Module.psm1</ins></b>] (https://github.com/rgel/PowerShell/blob/master/MS-Module/MS-Module.psm1)
 
 To install this module, drop the entire '<b>MS-Module</b>' folder into one of your module directories.
@@ -34,3 +38,7 @@ Distinguished name `CN=User1,OU=Sales,OU=North,DC=contoso,DC=com` = `Contoso\Nor
 ###### <b>2. [Write-Menu</b>] (http://goo.gl/MgLch1)
 
 This function creates colored, interactive and dynamic Menu in the PowerShell console.
+
+###### <b>3. [New-PercentageBar</b>] (http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell)
+
+This function creates colored and adjustable Percentage Bar in the PowerShell console.
