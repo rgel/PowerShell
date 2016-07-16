@@ -13,11 +13,10 @@ Function Get-MOTD {
   [CmdletBinding()]
 	
   Param(
-	
     [Parameter(Position=0,Mandatory=$false)]
 	[ValidateNotNullOrEmpty()]
     [string[]]$ComputerName
-		,
+    ,
     [Parameter(Position=1,Mandatory=$false)]
     [PSCredential]
     [System.Management.Automation.CredentialAttribute()]$Credential
