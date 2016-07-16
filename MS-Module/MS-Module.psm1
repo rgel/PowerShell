@@ -289,7 +289,7 @@ Function New-PercentageBar {
 	Author       ::	Roman Gelman.
 	Version 1.0  ::	04-Jul-2016  :: Release.
 .LINK
-	http://ps1code.com
+	http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell
 #>
 
 [CmdletBinding(DefaultParameterSetName='PERCENT')]
