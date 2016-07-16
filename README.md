@@ -7,7 +7,7 @@
 
 ### </b><ins>[Get-MOTD.ps1</ins></b>] (https://github.com/rgel/PowerShell/blob/master/Get-MOTD.ps1)
 
-###### <b>[Edited version of Get-MOTD.ps1 by Michal Millar</b>] (http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell)
+###### <b>[Edited version of Get-MOTD function written by Michal Millar</b>] (http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell)
 
 ### </b><ins>[MS-Module.psm1</ins></b>] (https://github.com/rgel/PowerShell/blob/master/MS-Module/MS-Module.psm1)
 
