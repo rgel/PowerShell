@@ -41,4 +41,4 @@ This function creates colored, interactive and dynamic Menu in the PowerShell co
 
 ###### <b>3. [New-PercentageBar</b>] (http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell)
 
-This function creates colored and adjustable Percentage Bar in the PowerShell console.
+This function creates colored and adjustable Percentage Bar in the PowerShell.
