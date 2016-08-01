@@ -414,6 +414,124 @@ End {
 	If (!$DrawBar) {return $Bar}
 } #End End
 
-} #End Function New-PercentageBar
+} #EndFunction New-PercentageBar
+
+Function New-RandomPassword {
+
+<#
+.SYNOPSIS
+	Generate a random password.
+.DESCRIPTION
+	This cmdlet generates a random password with different complexity levels.
+.PARAMETER Letters
+	Use 'a-z' letters.
+.PARAMETER CapitalLetters
+	Use 'A-Z' letters.
+.PARAMETER Digits
+	Use '0-9' digits.
+.PARAMETER SpecialCharacters
+	Use special characters.
+.PARAMETER Complex
+	Use all possible characters (letters, capital letters, digits and special characters).
+.PARAMETER PasswordLength
+	Password length.
+.EXAMPLE
+	PS C:\> New-RandomPassword -Complex
+	Generate complex password with default length.
+.EXAMPLE
+	PS C:\> New-RandomPassword -Letters -CapitalLetters -Digits -PasswordLength 8
+	Generate 8-character password without special characters.
+.EXAMPLE
+	PS C:\> (1..10) |% {New-RandomPassword -Digits}
+	Generate ten 8-digit numbers.
+.OUTPUTS
+	[System.String] Password.
+.NOTES
+	Author       ::	Roman Gelman.
+	Version 1.0  ::	01-Jun-2016  :: Release.
+.LINK
+	https://goo.gl/wOzNOe
+#>
+
+	[CmdletBinding(DefaultParameterSetName='Chars')]
+	
+	Param (
+		[Parameter(Mandatory=$false,Position=1,ParameterSetName='Chars')]
+		[switch]$Letters
+		,
+		[Parameter(Mandatory=$false,Position=2,ParameterSetName='Chars')]
+		[switch]$CapitalLetters
+		,
+		[Parameter(Mandatory=$false,Position=3,ParameterSetName='Chars')]
+		[switch]$Digits
+		,
+		[Parameter(Mandatory=$false,Position=4,ParameterSetName='Chars')]
+		[switch]$SpecialCharacters
+		,
+		[Parameter(Mandatory,Position=1,ParameterSetName='Complex')]
+		[switch]$Complex
+		,
+		[Parameter(Mandatory=$false,Position=5)]
+			[ValidateRange(6,24)]
+		[uint16]$PasswordLength = 8
+	)
+	
+	Begin {
+	
+		$loweraz = -join ((97..122) |%{[char][byte]$_})
+		$UPPERAZ = -join ((65..90)  |%{[char][byte]$_})
+		$digit09 = -join ((48..57)  |%{[char][byte]$_})
+		$special = -join ((33..47)  |%{[char][byte]$_}) + (-join ((58..64) |%{[char][byte]$_})) + (-join ((91..95) |%{[char][byte]$_}))
+		$CharSet = ''
+		$i = 0
+		### How many character groups choicen ###
+		If ($PSCmdlet.ParameterSetName -eq 'Chars') {
+			If ($PSBoundParameters.ContainsKey('CapitalLetters'))    {$i++}
+			If ($PSBoundParameters.ContainsKey('Letters'))           {$i++}
+			If ($PSBoundParameters.ContainsKey('SpecialCharacters')) {$i++}
+			If ($PSBoundParameters.ContainsKey('Digits'))            {$i++}
+		}
+		ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') {$i = 4}
+		
+		If (!$i) {Throw "You have to choice the password complexity!"}
+	}
+
+	Process {
+		
+		### How many characters in the each group ###
+		$CharCount = [math]::Truncate($PasswordLength/$i)
+		
+		If ($PSCmdlet.ParameterSetName -eq 'Chars') {
+			If ($PSBoundParameters.ContainsKey('CapitalLetters'))    {$CharSet += -join ($UPPERAZ.ToCharArray() |Get-Random -Count $CharCount)}
+			If ($PSBoundParameters.ContainsKey('Letters'))           {$CharSet += -join ($loweraz.ToCharArray() |Get-Random -Count $CharCount)}
+			If ($PSBoundParameters.ContainsKey('SpecialCharacters')) {$CharSet += -join ($special.ToCharArray() |Get-Random -Count $CharCount)}
+			If ($PSBoundParameters.ContainsKey('Digits'))            {$CharSet += -join ($digit09.ToCharArray() |Get-Random -Count $CharCount)}
+		}
+		ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') {
+			$CharSet = -join ($UPPERAZ.ToCharArray() |Get-Random -Count $CharCount) + `
+			(-join ($loweraz.ToCharArray() |Get-Random -Count $CharCount)) + `
+			(-join ($special.ToCharArray() |Get-Random -Count $CharCount)) + `
+			(-join ($digit09.ToCharArray() |Get-Random -Count $CharCount))
+		}
+		
+		### Additional characters if not divided evenly between all groups ###
+		If ($PasswordLength -gt $CharCount*$i) {
+			If ($PSCmdlet.ParameterSetName -eq 'Chars') {
+				If     ($PSBoundParameters.ContainsKey('CapitalLetters'))    {$CharSet += -join ($UPPERAZ.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
+				ElseIf ($PSBoundParameters.ContainsKey('Letters'))           {$CharSet += -join ($loweraz.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
+				ElseIf ($PSBoundParameters.ContainsKey('SpecialCharacters')) {$CharSet += -join ($special.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
+				ElseIf ($PSBoundParameters.ContainsKey('Digits'))            {$CharSet += -join ($digit09.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
+			}
+			ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') {$CharSet += -join ($loweraz.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
+		}
+	}
+	
+	End {
+	
+		### Shuffle resultant character set ###
+		return -join ($CharSet.ToCharArray() |sort {Get-Random})
+	}
+	
+} #EndFunction New-RandomPassword
 
 Export-ModuleMember -Alias '*' -Function '*'
