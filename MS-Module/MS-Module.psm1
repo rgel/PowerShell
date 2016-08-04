@@ -54,10 +54,10 @@ Filter Get-OUPath {
 	both the object itself and a domain name are not included in the returned string
 	and you will get EMPTY path for TOP LEVEL OU containers.
 .NOTES
-	Author: Roman Gelman.
+	Author      :: Roman Gelman.
 	Version 1.0 :: 18-May-2016 :: Release :: This function was fully rewrited from the original 'Get-OUTree'.
 .LINK
-	http://goo.gl/NwlePh
+	http://www.ps1code.com/single-post/2016/05/20/How-to-convert-AD-objects%E2%80%99-DistinguishedName-property-to-path-like-format
 #>
 
 Param ([switch]$IncludeDomainName,[switch]$ExcludeObjectName,[switch]$UCaseDomainName)
@@ -143,7 +143,7 @@ Function Write-Menu {
 	Author       ::	Roman Gelman.
 	Version 1.0  ::	21-Apr-2016  :: Release.
 .LINK
-	http://goo.gl/MgLch1
+	http://www.ps1code.com/single-post/2016/04/21/How-to-create-interactive-dynamic-Menu-in-PowerShell
 #>
 
 [CmdletBinding()]
@@ -450,7 +450,7 @@ Function New-RandomPassword {
 	Author       ::	Roman Gelman.
 	Version 1.0  ::	01-Jun-2016  :: Release.
 .LINK
-	https://goo.gl/wOzNOe
+	https://github.com/rgel/PowerShell
 #>
 
 	[CmdletBinding(DefaultParameterSetName='Chars')]
