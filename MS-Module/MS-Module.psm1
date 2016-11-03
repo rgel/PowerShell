@@ -104,8 +104,8 @@ Function Write-Menu {
 .SYNOPSIS
 	Display custom menu in the PowerShell console.
 .DESCRIPTION
-	This cmdlet writes numbered and colored menues in the PS console window
-	and returns the choiced entry.
+	The Write-Menu cmdlet creates numbered and colored menues
+	in the PS console window and returns the choiced entry.
 .PARAMETER Menu
 	Menu entries.
 .PARAMETER PropertyToShow
@@ -116,7 +116,7 @@ Function Write-Menu {
 .PARAMETER Header
 	Menu title (optional).
 .PARAMETER Shift
-	Quantity of <TAB> keys to shift the menu right.
+	Quantity of <TAB> keys to shift the menu items right.
 .PARAMETER TextColor
 	Menu text color.
 .PARAMETER HeaderColor
@@ -133,15 +133,16 @@ Function Write-Menu {
 	PS C:\> Write-Menu -Menu (Get-Service) -Header ":: Services list ::`n" -Prompt 'Select any service' -PropertyToShow DisplayName
 	Display local services menu with custom property 'DisplayName'.
 .EXAMPLE
-      PS C:\> Write-Menu -Menu (Get-Process |select *) -PropertyToShow ProcessName |fl
-      Display full info about choicen process.
+	PS C:\> Write-Menu -Menu (Get-Process |select *) -PropertyToShow ProcessName |fl
+	Display full info about choicen process.
 .INPUTS
-	[string[]] [pscustomobject[]] or any!!! type of array.
+	Any type of data (object(s), string(s), number(s), etc).
 .OUTPUTS
-	[The same type as input object] Single menu entry.
+	[The same type as input object] Single menu item.
 .NOTES
-	Author       ::	Roman Gelman.
-	Version 1.0  ::	21-Apr-2016  :: Release.
+	Author      :: Roman Gelman
+	Version 1.0 :: 21-Apr-2016 :: [Release]
+	Version 1.1 :: 03-Nov-2016 ::  [Change] Now the function supports a single item as menu entry.
 .LINK
 	http://www.ps1code.com/single-post/2016/04/21/How-to-create-interactive-dynamic-Menu-in-PowerShell
 #>
@@ -191,7 +192,7 @@ Param (
 Begin {
 
 	$ErrorActionPreference = 'Stop'
-	If ($Menu -isnot 'array') {Throw "The menu entries must be array or objects"}
+	If ($Menu -isnot [array]) {$Menu = @($Menu)}
 	If ($AddExit) {$MaxLength=8} Else {$MaxLength=9}
 	If ($Menu.Length -gt $MaxLength) {$AddZero=$true} Else {$AddZero=$false}
 	[hashtable]$htMenu = @{}
