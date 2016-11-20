@@ -593,7 +593,7 @@ Function Start-SleepProgress {
 	Some examples that use the .Where() method require PowerShell 4.0 or later.
 	The maximum sleep interval is twenty-four hours.
 .LINK
-	http://ps1code.com
+	http://www.ps1code.com/single-post/2016/11/20/Put-PowerShell-scripts-in-the-sleep-with-progress-bar
 #>
 
 [CmdletBinding(DefaultParameterSetName='SEC')]
