@@ -23,6 +23,8 @@ The default computer-level module path is: `"$env:windir\System32\WindowsPowerSh
 
 To use the module, type following command: `Import-Module MS-Module -Force -Verbose`.
 
+To get the module version type following command: `Get-Module -ListAvailable |? {$_.Name -eq 'MS-Module'}`.
+
 To see the commands imported, type `Get-Command -Module MS-Module`.
 
 For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [-Online][-Examples]`.
