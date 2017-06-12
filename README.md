@@ -9,7 +9,7 @@
 
 ###### [<b>Edited version of Get-MOTD function written by Michal Millar</b>](http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell)
 
-### [<ins>MS-Module.psm1</ins>](https://github.com/rgel/PowerShell/tree/master/MS-Module)
+### [<ins>MS-Module</ins>](https://github.com/rgel/PowerShell/tree/master/MS-Module)
 
 To install this module, drop the entire '<b>MS-Module</b>' folder into one of your module directories.
 
