@@ -30,7 +30,7 @@ To see the commands imported, type `Get-Command -Module MS-Module`.
 
 For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [-Online][-Examples]`.
 
-|No|MS-Module function|Description|
+|No|Function|Description|
 |----|----|----|
 |1|[<b>Get-OUPath</b>](https://ps1code.com/category/powershell/ms-module/)|Convert AD object's <i>DistinguishedName</i> property to a path like format. Distinguished name `CN=User1,OU=Sales,OU=North,DC=contoso,DC=com` = `Contoso\North\Sales\User1` in the path format|
 |2|[<b>Write-Menu</b>](https://ps1code.com/2016/04/21/write-menu-powershell)|Create colored, interactive and dynamic Menu in the PowerShell console|
