@@ -1,7 +1,7 @@
 # ![powershelllogo](https://cloud.githubusercontent.com/assets/6964549/17082276/0ded5776-5180-11e6-8276-d772295362b9.png)
 ## PowerShell Scripts & Modules
 
-### Scripts
+### SCRIPTS
 
 |No|Script|Description|
 |----|----|----|
@@ -27,6 +27,8 @@ To get the module version type following command: `Get-Module -ListAvailable |? 
 To see the commands imported, type `Get-Command -Module MS-Module`.
 
 For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [-Online][-Examples]`.
+
+### MODULES 
 
 #### <b><ins>MS-Module Cmdlets:</ins></b>
 
