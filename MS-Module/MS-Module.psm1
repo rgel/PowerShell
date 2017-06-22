@@ -1,5 +1,5 @@
 Filter Get-OUPath {
-
+	
 <#
 .SYNOPSIS
 	Convert AD object's 'DistinguishedName' property to path-like format.
@@ -59,47 +59,56 @@ Filter Get-OUPath {
 .LINK
 	http://www.ps1code.com/single-post/2016/05/20/How-to-convert-AD-objects%E2%80%99-DistinguishedName-property-to-path-like-format
 #>
-
-Param ([switch]$IncludeDomainName,[switch]$ExcludeObjectName,[switch]$UCaseDomainName)
-
-	If     ($_.GetType().Name -eq 'string')             {$DN = $_}
-	ElseIf ($_.GetType().Name -eq 'ADDomainController') {$DN = $_.ComputerObjectDN}
-	Else                                                {$DN = $_.DistinguishedName}
-
-	If ($IncludeDomainName)	{
-		If ($ExcludeObjectName) {
+	
+	Param ([switch]$IncludeDomainName,
+		[switch]$ExcludeObjectName,
+		[switch]$UCaseDomainName)
+	
+	If ($_.GetType().Name -eq 'string') { $DN = $_ }
+	ElseIf ($_.GetType().Name -eq 'ADDomainController') { $DN = $_.ComputerObjectDN }
+	Else { $DN = $_.DistinguishedName }
+	
+	If ($IncludeDomainName)
+	{
+		If ($ExcludeObjectName)
+		{
 			### Top level OU ###
-			If (($DN -split ',')[1].ToLower().StartsWith('dc=')) {$rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>dc=.+?),'}
+			If (($DN -split ',')[1].ToLower().StartsWith('dc=')) { $rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>dc=.+?),' }
 			### Non top level OU ###
-			Else                                                 {$rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>(ou=.+?|cn=.+?),dc=.+?),'}
+			Else { $rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>(ou=.+?|cn=.+?),dc=.+?),' }
 		}
-		Else {
+		Else
+		{
 			$rgxDN2OU = '(?i)^(?<OUPath>(ou=.+?|cn=.+?),dc=.+?),'
 		}
 	}
-	Else {
-		If ($ExcludeObjectName) {$rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>ou=.+?|cn=.+?),dc='}
-		Else                    {$rgxDN2OU = '(?i)^(?<OUPath>ou=.+?|cn=.+?),dc='}
+	Else
+	{
+		If ($ExcludeObjectName) { $rgxDN2OU = '(?i)^(cn|ou)=.+?,(?<OUPath>ou=.+?|cn=.+?),dc=' }
+		Else { $rgxDN2OU = '(?i)^(?<OUPath>ou=.+?|cn=.+?),dc=' }
 	}
-
+	
 	Try
+	{
+		$arrOU = [regex]::Match($DN, $rgxDN2OU).Groups['OUPath'].Value -replace ('ou=|cn=|dc=', $null) -split (',')
+		[array]::Reverse($arrOU)
+		If ($IncludeDomainName)
 		{
-			$arrOU = [regex]::Match($DN, $rgxDN2OU).Groups['OUPath'].Value -replace ('ou=|cn=|dc=', $null) -split (',')
-			[array]::Reverse($arrOU)
-			If ($IncludeDomainName) {
-				If ($UCaseDomainName) {$Domain = $arrOU[0].ToUpper()}
-				Else                  {$Domain = (Get-Culture).TextInfo.ToTitleCase($arrOU[0])}
-				If ($arrOU.Length -gt 1) {return $Domain + '\' + ($arrOU[1..($arrOU.Length-1)] -join ('\'))} Else {return $Domain}
-			}
-			Else {return $arrOU -join ('\')}
+			If ($UCaseDomainName) { $Domain = $arrOU[0].ToUpper() }
+			Else { $Domain = (Get-Culture).TextInfo.ToTitleCase($arrOU[0]) }
+			If ($arrOU.Length -gt 1) { return $Domain + '\' + ($arrOU[1 .. ($arrOU.Length - 1)] -join ('\')) }
+			Else { return $Domain }
 		}
-	Catch 
-		{return $null}
+		Else { return $arrOU -join ('\') }
+	}
+	Catch
+	{ return $null }
 	
 } #EndFilter Get-OUPath
 
-Function Write-Menu {
-
+Function Write-Menu
+{
+	
 <#
 .SYNOPSIS
 	Display custom menu in the PowerShell console.
@@ -140,107 +149,134 @@ Function Write-Menu {
 .OUTPUTS
 	[The same type as input object] Single menu item.
 .NOTES
-	Author      :: Roman Gelman
+	Author      :: Roman Gelman @rgelman75
 	Version 1.0 :: 21-Apr-2016 :: [Release]
-	Version 1.1 :: 03-Nov-2016 ::  [Change] Now the function supports a single item as menu entry.
+	Version 1.1 :: 03-Nov-2016 :: [Change] Supports a single item as menu entry
+	Version 1.2 :: 22-Jun-2017 :: [Change] Throw an error if property, specified by -PropertyToShow does not exist. Code optimization
 .LINK
-	http://www.ps1code.com/single-post/2016/04/21/How-to-create-interactive-dynamic-Menu-in-PowerShell
+	https://ps1code.com/2016/04/21/write-menu-powershell
 #>
-
-[CmdletBinding()]
-
-Param (
-
-	[Parameter(Mandatory,Position=0)]
-		[Alias("MenuEntry","List")]
-	$Menu
-	,
-	[Parameter(Mandatory=$false,Position=1)]
-	[string]$PropertyToShow = 'Name'
-	,
-	[Parameter(Mandatory=$false,Position=2)]
+	
+	[CmdletBinding()]
+	[Alias("menu")]
+	Param (
+		[Parameter(Mandatory, Position = 0)]
+		[Alias("MenuEntry", "List")]
+		$Menu
+		 ,
+		[Parameter(Mandatory = $false, Position = 1)]
+		[string]$PropertyToShow = 'Name'
+		 ,
+		[Parameter(Mandatory = $false, Position = 2)]
 		[ValidateNotNullorEmpty()]
-	[string]$Prompt = 'Pick a choice'
-	,
-	[Parameter(Mandatory=$false,Position=3)]
-		[Alias("MenuHeader")]
-	[string]$Header = ''
-	,
-	[Parameter(Mandatory=$false,Position=4)]
-		[ValidateRange(0,5)]
-		[Alias("Tab","MenuShift")]
-	[int]$Shift = 0
-	,
-	#[Enum]::GetValues([System.ConsoleColor])
-	[Parameter(Mandatory=$false,Position=5)]
-		[ValidateSet("Black","DarkBlue","DarkGreen","DarkCyan","DarkRed","DarkMagenta",
-		"DarkYellow","Gray","DarkGray","Blue","Green","Cyan","Red","Magenta","Yellow","White")]
-		[Alias("Color","MenuColor")]
-	[string]$TextColor = 'White'
-	,
-	[Parameter(Mandatory=$false,Position=6)]
-		[ValidateSet("Black","DarkBlue","DarkGreen","DarkCyan","DarkRed","DarkMagenta",
-		"DarkYellow","Gray","DarkGray","Blue","Green","Cyan","Red","Magenta","Yellow","White")]
-	[string]$HeaderColor = 'Yellow'
-	,
-	[Parameter(Mandatory=$false,Position=7)]
+		[string]$Prompt = 'Pick a choice'
+		 ,
+		[Parameter(Mandatory = $false, Position = 3)]
+		[Alias("Title")]
+		[string]$Header = ''
+		 ,
+		[Parameter(Mandatory = $false, Position = 4)]
+		[ValidateRange(0, 5)]
+		[Alias("Tab", "MenuShift")]
+		[int]$Shift = 0
+		 ,
+		[Parameter(Mandatory = $false, Position = 5)]
+		[Alias("Color", "MenuColor")]
+		[System.ConsoleColor]$TextColor = 'White'
+		 ,
+		[Parameter(Mandatory = $false, Position = 6)]
+		[System.ConsoleColor]$HeaderColor = 'Yellow'
+		 ,
+		[Parameter(Mandatory = $false)]
 		[ValidateNotNullorEmpty()]
-		[Alias("Exit","AllowExit")]
-	[switch]$AddExit
-)
-
-Begin {
-
-	$ErrorActionPreference = 'Stop'
-	If ($Menu -isnot [array]) {$Menu = @($Menu)}
-	If ($AddExit) {$MaxLength=8} Else {$MaxLength=9}
-	If ($Menu.Length -gt $MaxLength) {$AddZero=$true} Else {$AddZero=$false}
-	[hashtable]$htMenu = @{}
-}
-
-Process {
-
-	### Write menu header ###
-	If ($Header -ne '') {Write-Host $Header -ForegroundColor $HeaderColor}
+		[Alias("Exit", "AllowExit")]
+		[switch]$AddExit
+	)
 	
-	### Create shift prefix ###
-	If ($Shift -gt 0) {$Prefix = [string]"`t"*$Shift}
-	
-	### Build menu hash table ###
-	For ($i=1; $i -le $Menu.Length; $i++) {
-		If ($AddZero) {
-			If ($AddExit) {$lz = ([string]($Menu.Length+1)).Length - ([string]$i).Length}
-			Else          {$lz = ([string]$Menu.Length).Length - ([string]$i).Length}
-			$Key = "0"*$lz + "$i"
-		} Else {$Key = "$i"}
-		$htMenu.Add($Key,$Menu[$i-1])
-		If ($Menu[$i] -isnot 'string' -and ($Menu[$i-1].$PropertyToShow)) {
-			Write-Host "$Prefix[$Key] $($Menu[$i-1].$PropertyToShow)" -ForegroundColor $TextColor
-		} Else {Write-Host "$Prefix[$Key] $($Menu[$i-1])" -ForegroundColor $TextColor}
+	Begin
+	{
+		$ErrorActionPreference = 'Stop'
+		if ($Menu -isnot [array]) { $Menu = @($Menu) }
+		if ($Menu[0] -isnot [string])
+		{
+			if (!($Menu | Get-Member -MemberType Property -Name $PropertyToShow)) { Throw "Property [$PropertyToShow] does not exist" }
+		}
+		$MaxLength = if ($AddExit) { 8 }
+		else { 9 }
+		$AddZero = if ($Menu.Length -gt $MaxLength) { $true }
+		else { $false }
+		[hashtable]$htMenu = @{ }
 	}
-	If ($AddExit) {
-		[string]$Key = $Menu.Length+1
-		$htMenu.Add($Key,"Exit")
-		Write-Host "$Prefix[$Key] Exit" -ForegroundColor $TextColor
+	Process
+	{
+		### Write menu header ###
+		if ($Header -ne '') { Write-Host $Header -ForegroundColor $HeaderColor }
+		
+		### Create shift prefix ###
+		if ($Shift -gt 0) { $Prefix = [string]"`t" * $Shift }
+		
+		### Build menu hash table ###
+		for ($i = 1; $i -le $Menu.Length; $i++)
+		{
+			$Key = if ($AddZero)
+			{
+				$lz = if ($AddExit) { ([string]($Menu.Length + 1)).Length - ([string]$i).Length }
+				else { ([string]$Menu.Length).Length - ([string]$i).Length }
+				"0" * $lz + "$i"
+			}
+			else
+			{
+				"$i"
+			}
+			
+			$htMenu.Add($Key, $Menu[$i - 1])
+			
+			if ($Menu[$i] -isnot 'string' -and ($Menu[$i - 1].$PropertyToShow))
+			{
+				Write-Host "$Prefix[$Key] $($Menu[$i - 1].$PropertyToShow)" -ForegroundColor $TextColor
+			}
+			else
+			{
+				Write-Host "$Prefix[$Key] $($Menu[$i - 1])" -ForegroundColor $TextColor
+			}
+		}
+		
+		### Add 'Exit' row ###
+		if ($AddExit)
+		{
+			[string]$Key = $Menu.Length + 1
+			$htMenu.Add($Key, "Exit")
+			Write-Host "$Prefix[$Key] Exit" -ForegroundColor $TextColor
+		}
+		
+		### Pick a choice ###
+		Do
+		{
+			$Choice = Read-Host -Prompt $Prompt
+			$KeyChoice = if ($AddZero)
+			{
+				$lz = if ($AddExit) { ([string]($Menu.Length + 1)).Length - $Choice.Length }
+				else { ([string]$Menu.Length).Length - $Choice.Length }
+				if ($lz -gt 0) { "0" * $lz + "$Choice" }
+				else { $Choice }
+			}
+			else
+			{
+				$Choice
+			}
+		}
+		Until ($htMenu.ContainsKey($KeyChoice))
+	}
+	End
+	{
+		return $htMenu.get_Item($KeyChoice)
 	}
 	
-	### Pick a choice ###
-	Do {
-		$Choice = Read-Host -Prompt $Prompt
-		If ($AddZero) {
-			If ($AddExit) {$lz = ([string]($Menu.Length+1)).Length - $Choice.Length}
-			Else          {$lz = ([string]$Menu.Length).Length - $Choice.Length}
-			If ($lz -gt 0) {$KeyChoice = "0"*$lz + "$Choice"} Else {$KeyChoice = $Choice}
-		} Else {$KeyChoice = $Choice}
-	} Until ($htMenu.ContainsKey($KeyChoice))
-}
-
-End {return $htMenu.get_Item($KeyChoice)}
-
 } #EndFunction Write-Menu
 
-Function New-PercentageBar {
-
+Function New-PercentageBar
+{
+	
 <#
 .SYNOPSIS
 	Create percentage bar.
@@ -292,133 +328,150 @@ Function New-PercentageBar {
 .LINK
 	http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell
 #>
-
-[CmdletBinding(DefaultParameterSetName='PERCENT')]
-
-Param (
-	[Parameter(Mandatory,Position=1,ValueFromPipeline,ParameterSetName='PERCENT')]
-		[ValidateRange(0,100)]
-	[int]$Percent
-	,
-	[Parameter(Mandatory,Position=1,ValueFromPipeline,ParameterSetName='VALUE')]
-		[ValidateRange(0,[double]::MaxValue)]
-	[double]$Value
-	,
-	[Parameter(Mandatory,Position=2,ParameterSetName='VALUE')]
-		[ValidateRange(1,[double]::MaxValue)]
-	[double]$MaxValue
-	,
-	[Parameter(Mandatory=$false,Position=3)]
-		[Alias("BarSize","Length")]
-		[ValidateRange(10,100)]
-	[int]$BarLength = 20
-	,
-	[Parameter(Mandatory=$false,Position=4)]
-		[ValidateSet("SimpleThin","SimpleThick1","SimpleThick2","AdvancedThin1","AdvancedThin2","AdvancedThick")]
-	[string]$BarView = "SimpleThin"
-	,
-	[Parameter(Mandatory=$false,Position=5)]
-		[ValidateRange(50,80)]
-	[int]$GreenBorder = 60
-	,
-	[Parameter(Mandatory=$false,Position=6)]
-		[ValidateRange(80,90)]
-	[int]$YellowBorder = 80
-	,
-	[Parameter(Mandatory=$false)]
-	[switch]$NoPercent
-	,
-	[Parameter(Mandatory=$false)]
-	[switch]$DrawBar
-)
-
-Begin {
-
-	If ($PSBoundParameters.ContainsKey('VALUE')) {
-
-		If ($Value -gt $MaxValue) {
-			Throw "The [-Value] parameter cannot be greater than [-MaxValue]!"
-		}
-		Else {
-			$Percent = $Value/$MaxValue*100 -as [int]
-		}
-	}
 	
-	If ($YellowBorder -le $GreenBorder) {Throw "The [-YellowBorder] value must be greater than [-GreenBorder]!"}
+	[CmdletBinding(DefaultParameterSetName = 'PERCENT')]
+	Param (
+		[Parameter(Mandatory, Position = 1, ValueFromPipeline, ParameterSetName = 'PERCENT')]
+		[ValidateRange(0, 100)]
+		[int]$Percent
+		 ,
+		[Parameter(Mandatory, Position = 1, ValueFromPipeline, ParameterSetName = 'VALUE')]
+		[ValidateRange(0, [double]::MaxValue)]
+		[double]$Value
+		 ,
+		[Parameter(Mandatory, Position = 2, ParameterSetName = 'VALUE')]
+		[ValidateRange(1, [double]::MaxValue)]
+		[double]$MaxValue
+		 ,
+		[Parameter(Mandatory = $false, Position = 3)]
+		[Alias("BarSize", "Length")]
+		[ValidateRange(10, 100)]
+		[int]$BarLength = 20
+		 ,
+		[Parameter(Mandatory = $false, Position = 4)]
+		[ValidateSet("SimpleThin", "SimpleThick1", "SimpleThick2", "AdvancedThin1", "AdvancedThin2", "AdvancedThick")]
+		[string]$BarView = "SimpleThin"
+		 ,
+		[Parameter(Mandatory = $false, Position = 5)]
+		[ValidateRange(50, 80)]
+		[int]$GreenBorder = 60
+		 ,
+		[Parameter(Mandatory = $false, Position = 6)]
+		[ValidateRange(80, 90)]
+		[int]$YellowBorder = 80
+		 ,
+		[Parameter(Mandatory = $false)]
+		[switch]$NoPercent
+		 ,
+		[Parameter(Mandatory = $false)]
+		[switch]$DrawBar
+	)
 	
-	Function Set-BarView ($View) {
-		Switch -exact ($View) {
-			"SimpleThin"	{$GreenChar = [char]9632; $YellowChar = [char]9632; $RedChar = [char]9632; $EmptyChar = "-"; Break}
-			"SimpleThick1"	{$GreenChar = [char]9608; $YellowChar = [char]9608; $RedChar = [char]9608; $EmptyChar = "-"; Break}
-			"SimpleThick2"	{$GreenChar = [char]9612; $YellowChar = [char]9612; $RedChar = [char]9612; $EmptyChar = "-"; Break}
-			"AdvancedThin1"	{$GreenChar = [char]9632; $YellowChar = [char]9632; $RedChar = [char]9632; $EmptyChar = [char]9476; Break}
-			"AdvancedThin2"	{$GreenChar = [char]9642; $YellowChar = [char]9642; $RedChar = [char]9642; $EmptyChar = [char]9643; Break}
-			"AdvancedThick"	{$GreenChar = [char]9617; $YellowChar = [char]9618; $RedChar = [char]9619; $EmptyChar = [char]9482; Break}
-		}
-		$Properties = [ordered]@{
-			Char1 = $GreenChar
-			Char2 = $YellowChar
-			Char3 = $RedChar
-			Char4 = $EmptyChar
-		}
-		$Object = New-Object PSObject -Property $Properties
-		$Object
-	} #End Function Set-BarView
-	
-	$BarChars = Set-BarView -View $BarView
-	$Bar = $null
-	
-	Function Draw-Bar {
-	
-		Param (
-			[Parameter(Mandatory)][string]$Char
-			,
-			[Parameter(Mandatory=$false)][string]$Color = 'White'
-			,
-			[Parameter(Mandatory=$false)][boolean]$Draw
-		)
+	Begin
+	{
 		
-		If ($Draw) {
-			Write-Host -NoNewline -ForegroundColor ([System.ConsoleColor]$Color) $Char
-		}
-		Else {
-			return $Char
+		If ($PSBoundParameters.ContainsKey('VALUE'))
+		{
+			
+			If ($Value -gt $MaxValue)
+			{
+				Throw "The [-Value] parameter cannot be greater than [-MaxValue]!"
+			}
+			Else
+			{
+				$Percent = $Value/$MaxValue * 100 -as [int]
+			}
 		}
 		
-	} #End Function Draw-Bar
+		If ($YellowBorder -le $GreenBorder) { Throw "The [-YellowBorder] value must be greater than [-GreenBorder]!" }
+		
+		Function Set-BarView ($View)
+		{
+			Switch -exact ($View)
+			{
+				"SimpleThin"	{ $GreenChar = [char]9632; $YellowChar = [char]9632; $RedChar = [char]9632; $EmptyChar = "-"; Break }
+				"SimpleThick1"	{ $GreenChar = [char]9608; $YellowChar = [char]9608; $RedChar = [char]9608; $EmptyChar = "-"; Break }
+				"SimpleThick2"	{ $GreenChar = [char]9612; $YellowChar = [char]9612; $RedChar = [char]9612; $EmptyChar = "-"; Break }
+				"AdvancedThin1"	{ $GreenChar = [char]9632; $YellowChar = [char]9632; $RedChar = [char]9632; $EmptyChar = [char]9476; Break }
+				"AdvancedThin2"	{ $GreenChar = [char]9642; $YellowChar = [char]9642; $RedChar = [char]9642; $EmptyChar = [char]9643; Break }
+				"AdvancedThick"	{ $GreenChar = [char]9617; $YellowChar = [char]9618; $RedChar = [char]9619; $EmptyChar = [char]9482; Break }
+			}
+			$Properties = [ordered]@{
+				Char1 = $GreenChar
+				Char2 = $YellowChar
+				Char3 = $RedChar
+				Char4 = $EmptyChar
+			}
+			$Object = New-Object PSObject -Property $Properties
+			$Object
+		} #End Function Set-BarView
+		
+		$BarChars = Set-BarView -View $BarView
+		$Bar = $null
+		
+		Function Draw-Bar
+		{
+			
+			Param (
+				[Parameter(Mandatory)]
+				[string]$Char
+				 ,
+				[Parameter(Mandatory = $false)]
+				[string]$Color = 'White'
+				 ,
+				[Parameter(Mandatory = $false)]
+				[boolean]$Draw
+			)
+			
+			If ($Draw)
+			{
+				Write-Host -NoNewline -ForegroundColor ([System.ConsoleColor]$Color) $Char
+			}
+			Else
+			{
+				return $Char
+			}
+			
+		} #End Function Draw-Bar
+		
+	} #End Begin
 	
-} #End Begin
-
-Process {
+	Process
+	{
+		
+		If ($NoPercent)
+		{
+			$Bar += Draw-Bar -Char "[ " -Draw $DrawBar
+		}
+		Else
+		{
+			If ($Percent -eq 100) { $Bar += Draw-Bar -Char "$Percent% [ " -Draw $DrawBar }
+			ElseIf ($Percent -ge 10) { $Bar += Draw-Bar -Char " $Percent% [ " -Draw $DrawBar }
+			Else { $Bar += Draw-Bar -Char "  $Percent% [ " -Draw $DrawBar }
+		}
+		
+		For ($i = 1; $i -le ($BarValue = ([Math]::Round($Percent * $BarLength / 100))); $i++)
+		{
+			
+			If ($i -le ($GreenBorder * $BarLength / 100)) { $Bar += Draw-Bar -Char ($BarChars.Char1) -Color 'DarkGreen' -Draw $DrawBar }
+			ElseIf ($i -le ($YellowBorder * $BarLength / 100)) { $Bar += Draw-Bar -Char ($BarChars.Char2) -Color 'Yellow' -Draw $DrawBar }
+			Else { $Bar += Draw-Bar -Char ($BarChars.Char3) -Color 'Red' -Draw $DrawBar }
+		}
+		For ($i = 1; $i -le ($EmptyValue = $BarLength - $BarValue); $i++) { $Bar += Draw-Bar -Char ($BarChars.Char4) -Draw $DrawBar }
+		$Bar += Draw-Bar -Char " ]" -Draw $DrawBar
+		
+	} #End Process
 	
-	If ($NoPercent) {
-		$Bar += Draw-Bar -Char "[ " -Draw $DrawBar
-	}
-	Else {
-		If     ($Percent -eq 100) {$Bar += Draw-Bar -Char "$Percent% [ " -Draw $DrawBar}
-		ElseIf ($Percent -ge 10)  {$Bar += Draw-Bar -Char " $Percent% [ " -Draw $DrawBar}
-		Else                      {$Bar += Draw-Bar -Char "  $Percent% [ " -Draw $DrawBar}
-	}
+	End
+	{
+		If (!$DrawBar) { return $Bar }
+	} #End End
 	
-	For ($i=1; $i -le ($BarValue = ([Math]::Round($Percent * $BarLength / 100))); $i++) {
-	
-		If     ($i -le ($GreenBorder * $BarLength / 100))  {$Bar += Draw-Bar -Char ($BarChars.Char1) -Color 'DarkGreen' -Draw $DrawBar}
-		ElseIf ($i -le ($YellowBorder * $BarLength / 100)) {$Bar += Draw-Bar -Char ($BarChars.Char2) -Color 'Yellow' -Draw $DrawBar}
-		Else                                               {$Bar += Draw-Bar -Char ($BarChars.Char3) -Color 'Red' -Draw $DrawBar}
-	}
-	For ($i=1; $i -le ($EmptyValue = $BarLength - $BarValue); $i++) {$Bar += Draw-Bar -Char ($BarChars.Char4) -Draw $DrawBar}
-	$Bar += Draw-Bar -Char " ]" -Draw $DrawBar
-	
-} #End Process
-
-End {
-	If (!$DrawBar) {return $Bar}
-} #End End
-
 } #EndFunction New-PercentageBar
 
-Function New-RandomPassword {
-
+Function New-RandomPassword
+{
+	
 <#
 .SYNOPSIS
 	Generate a random password.
@@ -453,90 +506,98 @@ Function New-RandomPassword {
 .LINK
 	https://github.com/rgel/PowerShell
 #>
-
-	[CmdletBinding(DefaultParameterSetName='Chars')]
 	
+	[CmdletBinding(DefaultParameterSetName = 'Chars')]
 	Param (
-		[Parameter(Mandatory=$false,Position=1,ParameterSetName='Chars')]
+		[Parameter(Mandatory = $false, Position = 1, ParameterSetName = 'Chars')]
 		[switch]$Letters
-		,
-		[Parameter(Mandatory=$false,Position=2,ParameterSetName='Chars')]
+		 ,
+		[Parameter(Mandatory = $false, Position = 2, ParameterSetName = 'Chars')]
 		[switch]$CapitalLetters
-		,
-		[Parameter(Mandatory=$false,Position=3,ParameterSetName='Chars')]
+		 ,
+		[Parameter(Mandatory = $false, Position = 3, ParameterSetName = 'Chars')]
 		[switch]$Digits
-		,
-		[Parameter(Mandatory=$false,Position=4,ParameterSetName='Chars')]
+		 ,
+		[Parameter(Mandatory = $false, Position = 4, ParameterSetName = 'Chars')]
 		[switch]$SpecialCharacters
-		,
-		[Parameter(Mandatory,Position=1,ParameterSetName='Complex')]
+		 ,
+		[Parameter(Mandatory, Position = 1, ParameterSetName = 'Complex')]
 		[switch]$Complex
-		,
-		[Parameter(Mandatory=$false,Position=5)]
-			[ValidateRange(6,24)]
+		 ,
+		[Parameter(Mandatory = $false, Position = 5)]
+		[ValidateRange(6, 24)]
 		[uint16]$PasswordLength = 8
 	)
 	
-	Begin {
-	
-		$loweraz = -join ((97..122) |%{[char][byte]$_})
-		$UPPERAZ = -join ((65..90)  |%{[char][byte]$_})
-		$digit09 = -join ((48..57)  |%{[char][byte]$_})
-		$special = -join ((33..47)  |%{[char][byte]$_}) + (-join ((58..64) |%{[char][byte]$_})) + (-join ((91..95) |%{[char][byte]$_}))
+	Begin
+	{
+		
+		$loweraz = -join ((97 .. 122) | %{ [char][byte]$_ })
+		$UPPERAZ = -join ((65 .. 90) | %{ [char][byte]$_ })
+		$digit09 = -join ((48 .. 57) | %{ [char][byte]$_ })
+		$special = -join ((33 .. 47) | %{ [char][byte]$_ }) + (-join ((58 .. 64) | %{ [char][byte]$_ })) + (-join ((91 .. 95) | %{ [char][byte]$_ }))
 		$CharSet = ''
 		$i = 0
 		### How many character groups choicen ###
-		If ($PSCmdlet.ParameterSetName -eq 'Chars') {
-			If ($PSBoundParameters.ContainsKey('CapitalLetters'))    {$i++}
-			If ($PSBoundParameters.ContainsKey('Letters'))           {$i++}
-			If ($PSBoundParameters.ContainsKey('SpecialCharacters')) {$i++}
-			If ($PSBoundParameters.ContainsKey('Digits'))            {$i++}
+		If ($PSCmdlet.ParameterSetName -eq 'Chars')
+		{
+			If ($PSBoundParameters.ContainsKey('CapitalLetters')) { $i++ }
+			If ($PSBoundParameters.ContainsKey('Letters')) { $i++ }
+			If ($PSBoundParameters.ContainsKey('SpecialCharacters')) { $i++ }
+			If ($PSBoundParameters.ContainsKey('Digits')) { $i++ }
 		}
-		ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') {$i = 4}
+		ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') { $i = 4 }
 		
-		If (!$i) {Throw "You have to choice the password complexity!"}
+		If (!$i) { Throw "You have to choice the password complexity!" }
 	}
-
-	Process {
+	
+	Process
+	{
 		
 		### How many characters in the each group ###
 		$CharCount = [math]::Truncate($PasswordLength/$i)
 		
-		If ($PSCmdlet.ParameterSetName -eq 'Chars') {
-			If ($PSBoundParameters.ContainsKey('CapitalLetters'))    {$CharSet += -join ($UPPERAZ.ToCharArray() |Get-Random -Count $CharCount)}
-			If ($PSBoundParameters.ContainsKey('Letters'))           {$CharSet += -join ($loweraz.ToCharArray() |Get-Random -Count $CharCount)}
-			If ($PSBoundParameters.ContainsKey('SpecialCharacters')) {$CharSet += -join ($special.ToCharArray() |Get-Random -Count $CharCount)}
-			If ($PSBoundParameters.ContainsKey('Digits'))            {$CharSet += -join ($digit09.ToCharArray() |Get-Random -Count $CharCount)}
+		If ($PSCmdlet.ParameterSetName -eq 'Chars')
+		{
+			If ($PSBoundParameters.ContainsKey('CapitalLetters')) { $CharSet += -join ($UPPERAZ.ToCharArray() | Get-Random -Count $CharCount) }
+			If ($PSBoundParameters.ContainsKey('Letters')) { $CharSet += -join ($loweraz.ToCharArray() | Get-Random -Count $CharCount) }
+			If ($PSBoundParameters.ContainsKey('SpecialCharacters')) { $CharSet += -join ($special.ToCharArray() | Get-Random -Count $CharCount) }
+			If ($PSBoundParameters.ContainsKey('Digits')) { $CharSet += -join ($digit09.ToCharArray() | Get-Random -Count $CharCount) }
 		}
-		ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') {
-			$CharSet = -join ($UPPERAZ.ToCharArray() |Get-Random -Count $CharCount) + `
-			(-join ($loweraz.ToCharArray() |Get-Random -Count $CharCount)) + `
-			(-join ($special.ToCharArray() |Get-Random -Count $CharCount)) + `
-			(-join ($digit09.ToCharArray() |Get-Random -Count $CharCount))
+		ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex')
+		{
+			$CharSet = -join ($UPPERAZ.ToCharArray() | Get-Random -Count $CharCount) + `
+			(-join ($loweraz.ToCharArray() | Get-Random -Count $CharCount)) + `
+			(-join ($special.ToCharArray() | Get-Random -Count $CharCount)) + `
+			(-join ($digit09.ToCharArray() | Get-Random -Count $CharCount))
 		}
 		
 		### Additional characters if not divided evenly between all groups ###
-		If ($PasswordLength -gt $CharCount*$i) {
-			If ($PSCmdlet.ParameterSetName -eq 'Chars') {
-				If     ($PSBoundParameters.ContainsKey('CapitalLetters'))    {$CharSet += -join ($UPPERAZ.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
-				ElseIf ($PSBoundParameters.ContainsKey('Letters'))           {$CharSet += -join ($loweraz.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
-				ElseIf ($PSBoundParameters.ContainsKey('SpecialCharacters')) {$CharSet += -join ($special.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
-				ElseIf ($PSBoundParameters.ContainsKey('Digits'))            {$CharSet += -join ($digit09.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
+		If ($PasswordLength -gt $CharCount * $i)
+		{
+			If ($PSCmdlet.ParameterSetName -eq 'Chars')
+			{
+				If ($PSBoundParameters.ContainsKey('CapitalLetters')) { $CharSet += -join ($UPPERAZ.ToCharArray() | Get-Random -Count ($PasswordLength - $CharCount * $i)) }
+				ElseIf ($PSBoundParameters.ContainsKey('Letters')) { $CharSet += -join ($loweraz.ToCharArray() | Get-Random -Count ($PasswordLength - $CharCount * $i)) }
+				ElseIf ($PSBoundParameters.ContainsKey('SpecialCharacters')) { $CharSet += -join ($special.ToCharArray() | Get-Random -Count ($PasswordLength - $CharCount * $i)) }
+				ElseIf ($PSBoundParameters.ContainsKey('Digits')) { $CharSet += -join ($digit09.ToCharArray() | Get-Random -Count ($PasswordLength - $CharCount * $i)) }
 			}
-			ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') {$CharSet += -join ($loweraz.ToCharArray() |Get-Random -Count ($PasswordLength - $CharCount*$i))}
+			ElseIf ($PSCmdlet.ParameterSetName -eq 'Complex') { $CharSet += -join ($loweraz.ToCharArray() | Get-Random -Count ($PasswordLength - $CharCount * $i)) }
 		}
 	}
 	
-	End {
-	
+	End
+	{
+		
 		### Shuffle resultant character set ###
-		return -join ($CharSet.ToCharArray() |sort {Get-Random})
+		return -join ($CharSet.ToCharArray() | sort { Get-Random })
 	}
 	
 } #EndFunction New-RandomPassword
 
-Function Start-SleepProgress {
-
+Function Start-SleepProgress
+{
+	
 <#
 .SYNOPSIS
 	Put a script in the sleep with progress bar.
@@ -595,120 +656,131 @@ Function Start-SleepProgress {
 .LINK
 	http://www.ps1code.com/single-post/2016/11/20/Put-PowerShell-scripts-in-the-sleep-with-progress-bar
 #>
-
-[CmdletBinding(DefaultParameterSetName='SEC')]
-
-Param(
-
-  	[Parameter(Mandatory,Position=0,ParameterSetName='SEC')]
-		[ValidateRange(1,86400)]
-		[Alias("Seconds","s")]
-	[uint32]$Second
-	,
-	[Parameter(Mandatory,ParameterSetName='MIN')]
-		[ValidateRange(1,1440)]
-		[Alias("Minutes","m")]
-	[decimal]$Minute
-	,
-	[Parameter(Mandatory,ParameterSetName='HOUR')]
-		[ValidateRange(1,24)]
-		[Alias("Hours","h")]
-	[decimal]$Hour
-	,
-	[Parameter(Mandatory,ParameterSetName='TIME')]
-	[datetime]$Until
-	,
-	[Parameter(Mandatory=$false,ParameterSetName='TIME')]
-	[switch]$Force
-	,
-	[Parameter(Mandatory=$false)]
-		[Alias("RunAfter")]
-	[scriptblock]$ScriptBlock
-)
-
-Begin {
-
-	Switch -exact ($PSCmdlet.ParameterSetName) {
+	
+	[CmdletBinding(DefaultParameterSetName = 'SEC')]
+	Param (
 		
-		'SEC' {
-			$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
-			Break
+		[Parameter(Mandatory, Position = 0, ParameterSetName = 'SEC')]
+		[ValidateRange(1, 86400)]
+		[Alias("Seconds", "s")]
+		[uint32]$Second
+		 ,
+		[Parameter(Mandatory, ParameterSetName = 'MIN')]
+		[ValidateRange(1, 1440)]
+		[Alias("Minutes", "m")]
+		[decimal]$Minute
+		 ,
+		[Parameter(Mandatory, ParameterSetName = 'HOUR')]
+		[ValidateRange(1, 24)]
+		[Alias("Hours", "h")]
+		[decimal]$Hour
+		 ,
+		[Parameter(Mandatory, ParameterSetName = 'TIME')]
+		[datetime]$Until
+		 ,
+		[Parameter(Mandatory = $false, ParameterSetName = 'TIME')]
+		[switch]$Force
+		 ,
+		[Parameter(Mandatory = $false)]
+		[Alias("RunAfter")]
+		[scriptblock]$ScriptBlock
+	)
+	
+	Begin
+	{
+		
+		Switch -exact ($PSCmdlet.ParameterSetName)
+		{
+			
+			'SEC' {
+				$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
+				Break
+			}
+			'MIN' {
+				$Second = $Minute * 60 -as [uint32]
+				$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
+				Break
+			}
+			'HOUR' {
+				$Second = $Hour * 3600 -as [uint32]
+				$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
+				Break
+			}
+			'TIME' {
+				$TimeSpan = New-TimeSpan -Start ([datetime]::Now) -End $Until
+				$TotalSecond = $TimeSpan.TotalSeconds
+				If ($TotalSecond -le 0)
+				{
+					If ($Force) { Start-SleepProgress -Until $Until.AddDays(1) }
+					Else { Throw "The timestamp [ $($Until.ToString()) ] is in the past!`nUse [-Force] parameter to shift the timestamp to tomorrow [ $($Until.AddDays(1)) ]." }
+				}
+				Else
+				{
+					$Second = $TotalSecond -as [uint32]
+				}
+			}
+			
+		} #EndSwitch
+		
+		$h = 'hour'
+		$m = 'minute'
+		$s = 'second'
+		
+		If ($TimeSpan.Hours -ne 1) { $h = $h + 's' }
+		If ($TimeSpan.Minutes -ne 1) { $m = $m + 's' }
+		If ($TimeSpan.Seconds -ne 1) { $s = $s + 's' }
+		
+		Function Add-LeadingZero
+		{
+			Param ([Parameter(Mandatory, Position = 0)]
+				[int]$Digit)
+			$str = $Digit.ToString()
+			If ($str.Length -eq 1) { $str = '0' + $str }
+			return $str
+		} #EndFunction Add-LeadingZero
+		
+	} #EndBegin
+	
+	Process
+	{
+		
+		If ($PSCmdlet.ParameterSetName -eq 'SEC')
+		{
+			
+			For ($i = 1; $i -le $Second; $i++)
+			{
+				
+				Write-Progress -Activity "Waiting $($TimeSpan.Hours) $h $($TimeSpan.Minutes) $m and $($TimeSpan.Seconds) $s ..." `
+							   -CurrentOperation "Left time: $([int]($Second - $i)) seconds" `
+							   -Status "Elapsed time: $i seconds" -PercentComplete (100/$Second * $i)
+				Start-Sleep -Milliseconds 980
+			}
 		}
-		'MIN' {
-			$Second   = $Minute * 60 -as [uint32]
-			$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
-			Break
-		}
-		'HOUR' {
-			$Second   = $Hour * 3600 -as [uint32]
-			$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
-			Break
-		}
-		'TIME' {
-			$TimeSpan = New-TimeSpan -Start ([datetime]::Now) -End $Until
-			$TotalSecond = $TimeSpan.TotalSeconds
-			If ($TotalSecond -le 0) {
-				If ($Force) {Start-SleepProgress -Until $Until.AddDays(1)}
-				Else {Throw "The timestamp [ $($Until.ToString()) ] is in the past!`nUse [-Force] parameter to shift the timestamp to tomorrow [ $($Until.AddDays(1)) ]."}
-			} Else {
-				$Second = $TotalSecond -as [uint32]
+		Else
+		{
+			
+			For ($i = 1; $i -le $Second; $i++)
+			{
+				
+				$Now = Get-Date
+				$TimeElapsed = New-TimeSpan -Start $Now -End $Now.AddSeconds($i)
+				$TimeLeft = New-TimeSpan -Start $Now -End $Now.AddSeconds([int]($Second - $i))
+				Write-Progress -Activity "Waiting $($TimeSpan.Hours) $h $($TimeSpan.Minutes) $m and $($TimeSpan.Seconds) $s ..." `
+							   -CurrentOperation "Left time: $(Add-LeadingZero $TimeLeft.Hours):$(Add-LeadingZero $TimeLeft.Minutes):$(Add-LeadingZero $TimeLeft.Seconds)" `
+							   -Status "Elapsed time: $(Add-LeadingZero $TimeElapsed.Hours):$(Add-LeadingZero $TimeElapsed.Minutes):$(Add-LeadingZero $TimeElapsed.Seconds)" `
+							   -PercentComplete (100/$Second * $i)
+				Start-Sleep -Milliseconds 980
 			}
 		}
 		
-	} #EndSwitch
+		Write-Progress -Activity "Completed" -Completed
+		
+	} #EndProcess
 	
-	$h = 'hour'
-	$m = 'minute'
-	$s = 'second'
+	End
+	{
+		If ($PSBoundParameters.ContainsKey('ScriptBlock')) { &$ScriptBlock }
+	} #End
 	
-	If ($TimeSpan.Hours -ne 1)   {$h=$h+'s'}
-	If ($TimeSpan.Minutes -ne 1) {$m=$m+'s'}
-	If ($TimeSpan.Seconds -ne 1) {$s=$s+'s'}
-	
-	### Internal helper function ###
-	Function Add-LeadingZero {
-		Param ([Parameter(Mandatory,Position=0)][int]$Digit)
-		$str = $Digit.ToString()
-		If ($str.Length -eq 1) {$str = '0'+$str}
-		return $str
-	} #EndFunction Add-LeadingZero
-
-} #EndBegin
-
-Process {
-
-	If ($PSCmdlet.ParameterSetName -eq 'SEC') {
-	
-		For ($i=1; $i -le $Second; $i++) {
-
-		  	Write-Progress -Activity "Waiting $($TimeSpan.Hours) $h $($TimeSpan.Minutes) $m and $($TimeSpan.Seconds) $s ..." `
-			-CurrentOperation "Left time: $([int]($Second - $i)) seconds" `
-			-Status "Elapsed time: $i seconds" -PercentComplete (100/$Second*$i)
-		    Start-Sleep -Milliseconds 980
-		}
-	} Else {
-	
-		For ($i=1; $i -le $Second; $i++) {
-
-			$Now         = Get-Date
-			$TimeElapsed = New-TimeSpan -Start $Now -End $Now.AddSeconds($i)
-			$TimeLeft    = New-TimeSpan -Start $Now -End $Now.AddSeconds([int]($Second-$i))
-		  	Write-Progress -Activity "Waiting $($TimeSpan.Hours) $h $($TimeSpan.Minutes) $m and $($TimeSpan.Seconds) $s ..." `
-			-CurrentOperation "Left time: $(Add-LeadingZero $TimeLeft.Hours):$(Add-LeadingZero $TimeLeft.Minutes):$(Add-LeadingZero $TimeLeft.Seconds)" `
-			-Status "Elapsed time: $(Add-LeadingZero $TimeElapsed.Hours):$(Add-LeadingZero $TimeElapsed.Minutes):$(Add-LeadingZero $TimeElapsed.Seconds)" `
-			-PercentComplete (100/$Second*$i)
-		    Start-Sleep -Milliseconds 980
-		}
-	}
-	
-	Write-Progress -Activity "Completed" -Completed
-	
-} #EndProcess
-
-End {
-	If ($PSBoundParameters.ContainsKey('ScriptBlock')) {&$ScriptBlock}
-} #End
-
 } #EndFunction Start-SleepProgress
 
-Export-ModuleMember -Alias '*' -Function '*'
