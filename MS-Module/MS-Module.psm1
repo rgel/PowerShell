@@ -600,23 +600,23 @@ Function Start-SleepProgress
 	
 <#
 .SYNOPSIS
-	Put a script in the sleep with progress bar.
+	Put a script to sleep with progress bar.
 .DESCRIPTION
-	The Start-SleepProgress cmdlet puts a script or cmdlet in the sleep for specified interval
+	This function puts a script or cmdlet to sleep for specified interval
 	of either seconds/minutes/hours or until specified timestamp.
 .PARAMETER Second
-	Seconds to sleep.
+	Specifies Seconds to sleep.
 .PARAMETER Minute
-	Minutes to sleep.
+	Specifies Minutes to sleep.
 .PARAMETER Hour
-	Hours to sleep.
+	Specifies Hours to sleep.
 .PARAMETER Until
-	Sleep until this date/time.
+	Specifies date/time to sleep until it.
 .PARAMETER Force
 	If desired timestamp specified by -Until parameter
 	earlier than current time, then assume it will be tomorrow.
 .PARAMETER ScriptBlock
-	Execute this code after the sleep is finished.
+	Specifies code to execute after the sleep is finished.
 	Must be enclosed in the curly braces {}.
 .EXAMPLE
 	C:\PS> Start-SleepProgress -Second 20
@@ -633,7 +633,7 @@ Function Start-SleepProgress
 	C:\PS> Start-SleepProgress -Until (Get-Date -Hour 0 -Minute 0 -Second 0).AddDays(1) -ScriptBlock {(Get-Service).Where{$_.Status -eq 'Running'} > '.\services.txt'}
 	Take snapshot of all running services and export the list to a text file at midnight.
 .EXAMPLE
-	C:\PS> For ($i=0; $i -lt 10; $i++) {Start-SleepProgress -s 5 -ScriptBlock {(dir "$env:windir\Temp\" |sort LastWriteTime -Descending).Where({$_.Name -like '*.tmp'},'First')}}
+	C:\PS> for ($i=0; $i -lt 10; $i++) {Start-SleepProgress -s 5 -ScriptBlock {(dir "$env:windir\Temp\" |sort LastWriteTime -Descending).Where({$_.Name -like '*.tmp'},'First')}}
 	Every five seconds get the newest ".TMP" file from Windows temp directory. Do it ten times.
 .EXAMPLE
 	C:\PS> Start-SleepProgress -Until 08:45
@@ -648,18 +648,18 @@ Function Start-SleepProgress
 	C:\PS> Start-SleepProgress -Until (Get-Date -Hour 2 -Minute 0 -Second 0).AddDays(1)
 	Sleep until tomorrow 2:00 AM.
 .NOTES
-	Author       ::	Roman Gelman
-	Version 1.0  ::	20-Nov-2016 :: [Release]
-	The Start-SleepProgress cmdlet requires PowerShell 3.0
-	Some examples that use the .Where() method require PowerShell 4.0 or later.
-	The maximum sleep interval is twenty-four hours.
+	Author      :: Roman Gelman @rgelman75
+	Requirement :: PowerShell 3.0
+	Dependency  :: The maximum sleep interval is 24 hours
+	Version 1.0 :: 20-Nov-2016 :: [Release]
+	Version 1.1 :: 25-Jun-2017 :: [Change] Minor code optimization, alias added
 .LINK
-	http://www.ps1code.com/single-post/2016/11/20/Put-PowerShell-scripts-in-the-sleep-with-progress-bar
+	https://ps1code.com/2016/11/20/sleep-powershell-scripts-progress-bar
 #>
 	
 	[CmdletBinding(DefaultParameterSetName = 'SEC')]
+	[Alias("slp")]
 	Param (
-		
 		[Parameter(Mandatory, Position = 0, ParameterSetName = 'SEC')]
 		[ValidateRange(1, 86400)]
 		[Alias("Seconds", "s")]
@@ -688,47 +688,49 @@ Function Start-SleepProgress
 	
 	Begin
 	{
-		
-		Switch -exact ($PSCmdlet.ParameterSetName)
+		switch -exact ($PSCmdlet.ParameterSetName)
 		{
-			
-			'SEC' {
+			'SEC'
+			{
 				$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
 				Break
 			}
-			'MIN' {
+			'MIN'
+			{
 				$Second = $Minute * 60 -as [uint32]
 				$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
 				Break
 			}
-			'HOUR' {
+			'HOUR'
+			{
 				$Second = $Hour * 3600 -as [uint32]
 				$TimeSpan = New-TimeSpan -Start (Get-Date) -End (Get-Date).AddSeconds($Second)
 				Break
 			}
-			'TIME' {
+			'TIME'
+			{
 				$TimeSpan = New-TimeSpan -Start ([datetime]::Now) -End $Until
 				$TotalSecond = $TimeSpan.TotalSeconds
-				If ($TotalSecond -le 0)
+				if ($TotalSecond -le 0)
 				{
-					If ($Force) { Start-SleepProgress -Until $Until.AddDays(1) }
-					Else { Throw "The timestamp [ $($Until.ToString()) ] is in the past!`nUse [-Force] parameter to shift the timestamp to tomorrow [ $($Until.AddDays(1)) ]." }
+					if ($Force) { Start-SleepProgress -Until $Until.AddDays(1) }
+					else { Throw "The timestamp [ $($Until.ToString()) ] is in the past!`nUse [-Force] parameter to shift the timestamp to tomorrow [ $($Until.AddDays(1)) ]." }
 				}
-				Else
+				else
 				{
 					$Second = $TotalSecond -as [uint32]
 				}
 			}
 			
-		} #EndSwitch
+		}
 		
 		$h = 'hour'
 		$m = 'minute'
 		$s = 'second'
 		
-		If ($TimeSpan.Hours -ne 1) { $h = $h + 's' }
-		If ($TimeSpan.Minutes -ne 1) { $m = $m + 's' }
-		If ($TimeSpan.Seconds -ne 1) { $s = $s + 's' }
+		$h += if ($TimeSpan.Hours -ne 1) { 's' }
+		$m += if ($TimeSpan.Minutes -ne 1) { 's' }
+		$s += if ($TimeSpan.Seconds -ne 1) { 's' }
 		
 		Function Add-LeadingZero
 		{
@@ -739,15 +741,12 @@ Function Start-SleepProgress
 			return $str
 		} #EndFunction Add-LeadingZero
 		
-	} #EndBegin
-	
+	}
 	Process
 	{
-		
-		If ($PSCmdlet.ParameterSetName -eq 'SEC')
+		if ($PSCmdlet.ParameterSetName -eq 'SEC')
 		{
-			
-			For ($i = 1; $i -le $Second; $i++)
+			for ($i = 1; $i -le $Second; $i++)
 			{
 				
 				Write-Progress -Activity "Waiting $($TimeSpan.Hours) $h $($TimeSpan.Minutes) $m and $($TimeSpan.Seconds) $s ..." `
@@ -756,10 +755,9 @@ Function Start-SleepProgress
 				Start-Sleep -Milliseconds 980
 			}
 		}
-		Else
+		else
 		{
-			
-			For ($i = 1; $i -le $Second; $i++)
+			for ($i = 1; $i -le $Second; $i++)
 			{
 				
 				$Now = Get-Date
@@ -772,15 +770,11 @@ Function Start-SleepProgress
 				Start-Sleep -Milliseconds 980
 			}
 		}
-		
 		Write-Progress -Activity "Completed" -Completed
-		
-	} #EndProcess
-	
+	}
 	End
 	{
 		If ($PSBoundParameters.ContainsKey('ScriptBlock')) { &$ScriptBlock }
-	} #End
-	
+	}
 } #EndFunction Start-SleepProgress
 
