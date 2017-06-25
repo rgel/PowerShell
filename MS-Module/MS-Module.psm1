@@ -199,7 +199,7 @@ Function Write-Menu
 		if ($Menu -isnot [array]) { $Menu = @($Menu) }
 		if ($Menu[0] -isnot [string])
 		{
-			if (!($Menu | Get-Member -MemberType Property -Name $PropertyToShow)) { Throw "Property [$PropertyToShow] does not exist" }
+			if (!($Menu | Get-Member -MemberType Property, NoteProperty -Name $PropertyToShow)) { Throw "Property [$PropertyToShow] does not exist" }
 		}
 		$MaxLength = if ($AddExit) { 8 }
 		else { 9 }
