@@ -1,4 +1,4 @@
-# ![powershelllogo](https://cloud.githubusercontent.com/assets/6964549/17082276/0ded5776-5180-11e6-8276-d772295362b9.png)PowerShell Scripts & Modules
+# ![powershelllogo](https://cloud.githubusercontent.com/assets/6964549/17082276/0ded5776-5180-11e6-8276-d772295362b9.png)PowerShell Repo
 
 ### SCRIPTS
 
@@ -10,7 +10,7 @@
 ##
 ### MODULES
 
-### [<ins>MS-Module</ins>](https://github.com/rgel/PowerShell/tree/master/MS-Module)
+### [<ins>MS-Module</ins>](https://github.com/rgel/PowerShell/tree/master/MS-Module) Microsoft Infra Automation Module
 
 To install this module, drop the entire '<b>MS-Module</b>' folder into one of your module directories.
 
