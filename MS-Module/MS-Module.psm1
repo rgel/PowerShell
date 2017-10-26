@@ -54,10 +54,10 @@ Filter Get-OUPath {
 	both the object itself and a domain name are not included in the returned string
 	and you will get EMPTY path for TOP LEVEL OU containers.
 .NOTES
-	Author      :: Roman Gelman.
-	Version 1.0 :: 18-May-2016 :: Release :: This function was fully rewrited from the original 'Get-OUTree'.
+	Author      :: Roman Gelman @rgelman75
+	Version 1.0 :: 18-May-2016 :: [Release] :: This function was fully rewrited from the original 'Get-OUTree'
 .LINK
-	http://www.ps1code.com/single-post/2016/05/20/How-to-convert-AD-objects%E2%80%99-DistinguishedName-property-to-path-like-format
+	https://ps1code.com/category/powershell/ms-module/
 #>
 	
 	Param ([switch]$IncludeDomainName,
@@ -150,9 +150,10 @@ Function Write-Menu
 	[The same type as input object] Single menu item.
 .NOTES
 	Author      :: Roman Gelman @rgelman75
-	Version 1.0 :: 21-Apr-2016 :: [Release]
-	Version 1.1 :: 03-Nov-2016 :: [Change] Supports a single item as menu entry
-	Version 1.2 :: 22-Jun-2017 :: [Change] Throw an error if property, specified by -PropertyToShow does not exist. Code optimization
+	Version 1.0 :: 21-Apr-2016 :: [Release] :: Publicly available
+	Version 1.1 :: 03-Nov-2016 :: [Change] :: Supports a single item as menu entry
+	Version 1.2 :: 22-Jun-2017 :: [Change] :: Throws an error if property, specified by -PropertyToShow does not exist. Code optimization
+	Version 1.3 :: 27-Sep-2017 :: [Bugfix] :: Fixed throwing an error while menu entries are numeric values
 .LINK
 	https://ps1code.com/2016/04/21/write-menu-powershell
 #>
@@ -197,7 +198,7 @@ Function Write-Menu
 	{
 		$ErrorActionPreference = 'Stop'
 		if ($Menu -isnot [array]) { $Menu = @($Menu) }
-		if ($Menu[0] -isnot [string])
+		if ($Menu[0] -is [psobject] -and $Menu[0] -isnot [string])
 		{
 			if (!($Menu | Get-Member -MemberType Property, NoteProperty -Name $PropertyToShow)) { Throw "Property [$PropertyToShow] does not exist" }
 		}
@@ -323,10 +324,10 @@ Function New-PercentageBar
 	PS C:\> New-PercentageBar -Value ($VolumeC.Size-$VolumeC.Freespace) -MaxValue $VolumeC.Size -DrawBar; "`r"
 	Get system volume usage report.
 .NOTES
-	Author       ::	Roman Gelman.
-	Version 1.0  ::	04-Jul-2016  :: Release.
+	Author      :: Roman Gelman @rgelman75
+	Version 1.0 :: 04-Jul-2016 :: [Release] :: Publicly available
 .LINK
-	http://www.ps1code.com/single-post/2016/07/16/How-to-create-colored-and-adjustable-Percentage-Bar-in-PowerShell
+	https://ps1code.com/2016/07/16/percentage-bar-powershell
 #>
 	
 	[CmdletBinding(DefaultParameterSetName = 'PERCENT')]
@@ -501,8 +502,8 @@ Function New-RandomPassword
 .OUTPUTS
 	[System.String] Password.
 .NOTES
-	Author       ::	Roman Gelman.
-	Version 1.0  ::	01-Jun-2016  :: Release.
+	Author      :: Roman Gelman @rgelman75
+	Version 1.0 :: 01-Jun-2016 :: [Release] :: Publicly available
 .LINK
 	https://github.com/rgel/PowerShell
 #>
@@ -651,8 +652,8 @@ Function Start-SleepProgress
 	Author      :: Roman Gelman @rgelman75
 	Requirement :: PowerShell 3.0
 	Dependency  :: The maximum sleep interval is 24 hours
-	Version 1.0 :: 20-Nov-2016 :: [Release]
-	Version 1.1 :: 25-Jun-2017 :: [Change] Minor code optimization, alias added
+	Version 1.0 :: 20-Nov-2016 :: [Release] :: Publicly available
+	Version 1.1 :: 25-Jun-2017 :: [Change]  :: Minor code optimization, alias added
 .LINK
 	https://ps1code.com/2016/11/20/sleep-powershell-scripts-progress-bar
 #>
@@ -777,4 +778,65 @@ Function Start-SleepProgress
 		If ($PSBoundParameters.ContainsKey('ScriptBlock')) { &$ScriptBlock }
 	}
 } #EndFunction Start-SleepProgress
+
+Function Invoke-SortIpAddress
+{
+	
+<#
+.SYNOPSIS
+	Sort IP addresses pool.
+.DESCRIPTION
+	This simple and short function intellectually sorts IP addresses.
+.PARAMETER IpPool
+	Specifies IP addresses to sort.
+.PARAMETER ZA
+	If specified, sort descending.
+.EXAMPLE
+	PS C:\> '172.31.97.14', '172.31.97.20', '172.31.97.4' | Sort-IpAddress
+	Try the same with the Sort-Object cmdlet instead of the Sort-IpAddress and compare the results :-)
+.EXAMPLE
+	PS C:\> 1..254 |% {"192.168.10.$_"} | Sort-IpAddress -ZA
+	Sort descending a Class C subnet.
+.NOTES
+	Author      :: Roman Gelman @rgelman75
+	Version 1.0 :: 24-Oct-2017 :: [Release] :: Publicly available
+.LINK
+	https://ps1code.com/2017/10/26/sort-ip-address-powershell
+#>
+	
+	[CmdletBinding()]
+	[Alias("Sort-IpPool", "Sort-IpAddress")]
+	Param (
+		[Parameter(Mandatory, ValueFromPipeline)]
+		[ipaddress[]]$IpPool
+		 ,
+		[Parameter(Mandatory = $false)]
+		[switch]$ZA
+	)
+	
+	Begin
+	{ }
+	Process
+	{
+		$IpPool2 += $IpPool
+	}
+	End
+	{
+		$IpPoolObj = foreach ($Ip in $IpPool2)
+		{
+			$IpBytes = $Ip.GetAddressBytes()
+			
+			[pscustomobject] @{
+				IP = $Ip.IPAddressToString
+				Octat1 = $IpBytes[0]
+				Octat2 = $IpBytes[1]
+				Octat3 = $IpBytes[2]
+				Octat4 = $IpBytes[3]
+			}
+		}
+		if ($ZA) { ($IpPoolObj | Sort-Object -Descending Octat1, Octat2, Octat3, Octat4).IP }
+		else { ($IpPoolObj | Sort-Object Octat1, Octat2, Octat3, Octat4).IP }
+	}
+	
+} #EndFunction Invoke-SortIpAddress
 
