@@ -4,7 +4,7 @@
 
 |No|Script|Description|
 |----|----|----|
-|1|[<b>Get-NetStat.ps1</b>](https://github.com/rgel/PowerShell/blob/master/SysAdminTools/Get-NetStat.ps1)|`netstat.exe` regex [parser](http://www.lazywinadmin.com/2014/08/powershell-parse-this-netstatexe.html)|
+|1|[<b>Get-NetStat.ps1</b>](https://github.com/rgel/PowerShell/blob/master/SysAdminTools/Get-NetStat.ps1)|The `netstat.exe` regex [parser](http://www.lazywinadmin.com/2014/08/powershell-parse-this-netstatexe.html)|
 |2|[<b>Get-MOTD.ps1</b>](https://github.com/rgel/PowerShell/blob/master/Get-MOTD.ps1)|[Edited](https://ps1code.com/2016/07/16/percentage-bar-powershell) version of `Get-MOTD` function written by Michal Millar|
 
 ##
