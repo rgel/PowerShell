@@ -840,3 +840,151 @@ Function Invoke-SortIpAddress
 	
 } #EndFunction Invoke-SortIpAddress
 
+Function Write-HostHighlight
+{
+	
+<#
+.SYNOPSIS
+	Write input string to the console while highlighting specified string.
+.DESCRIPTION
+	This function writes input string to the PowerShell console
+	while highlighting specified string by color.
+.PARAMETER InputObject
+	Specifies input string.
+.PARAMETER Highlight
+	Specifies string to highlight within input object.
+.PARAMETER BackgroundColor
+	Specifies background color for highlighted string.
+.PARAMETER ForegroundColor
+	Specifies foreground color for highlighted string.
+.PARAMETER HideNotMatch
+	If specified, does not display not matched lines.
+.PARAMETER LineNum
+	If specified, add line numbers.
+.PARAMETER CaseSensitive
+	If specified, the search is case sensitive.
+.EXAMPLE
+	PS C:\> 'Errorzzz)(xxxERROR_yyyerrOr' | Write-HostHighlight -Highlight error -BackgroundColor Yellow -ForegroundColor Red
+	Highlight with custom colors.
+.EXAMPLE
+	PS C:\> Get-Content $env:windir\WindowsUpdate.log | select -Last 50 | Write-HostHighlight FATAL -HideNotMatch -CaseSensitive
+	Make case sensitive highlight in the last lines of the log file.
+.EXAMPLE
+	PS C:\> Get-Content $env:windir\WindowsUpdate.log -Wait | Write-HostHighlight fatal -LineNum
+	Add line numbers and highlight while live file monitoring (gc -Wait = tail -f).
+.EXAMPLE
+	PS C:\> Import-Csv .\Inputfile.csv | Write-HostHighlight string
+.NOTES
+	Author      :: Roman Gelman @rgelman75
+	Shell       :: Tested on PowerShell 5.0
+	Version 1.0 :: 22-Jan-2019 :: [Release] :: Publicly available
+.LINK
+	https://ps1code.com/2019/01/22/highlight-powershell
+#>
+	
+	Param (
+		[Parameter(Mandatory, ValueFromPipeline)]
+		[string]$InputObject
+		 ,
+		[Parameter(Mandatory, Position = 0)]
+		[ValidateNotNull()]
+		[string]$Highlight
+		 ,
+		[Parameter(Position = 1)]
+		[ValidateNotNullOrEmpty()]
+		[Alias('bgc')]
+		[System.ConsoleColor]$BackgroundColor = 'Red'
+		 ,
+		[Parameter(Position = 2)]
+		[Alias('fgc')]
+		[System.ConsoleColor]$ForegroundColor = $Host.UI.RawUI.ForegroundColor
+		 ,
+		[switch]$HideNotMatch
+		 ,
+		[switch]$LineNum
+		 ,
+		[switch]$CaseSensitive
+	)
+	
+	Begin
+	{
+		$l = 0
+		$fgPipe = 'Yellow'
+		$bgLine = $Host.UI.RawUI.BackgroundColor
+		
+		$Length = $Highlight.Length
+		$Regex = if ($CaseSensitive)
+		{
+			New-Object System.Text.RegularExpressions.Regex([regex]::Escape($Highlight),
+				[System.Text.RegularExpressions.RegexOptions]::None)
+		}
+		else
+		{
+			New-Object System.Text.RegularExpressions.Regex([regex]::Escape($Highlight),
+				[System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+		}
+		
+		Write-Debug "-Highlight : [$Highlight] :: HighlightEscape : [$([regex]::Escape($Highlight))]"
+	}
+	Process
+	{
+		$l++
+		
+		$StartHighlight = @(($Matches = $Regex.Matches($InputObject)).Index)
+		
+		if ($Matches.Success -eq $true)
+		{
+			Write-Debug "$InputObject :: [$($StartHighlight)]"
+			
+			### Write line number ###
+			if ($LineNum)
+			{
+				$Host.UI.Write('Yellow', $bgLine, "$l ")
+				$Host.UI.Write($fgPipe, $bgLine, "|")
+			}
+			
+			### Start write till first highlight ###
+			if ($StartHighlight[0] -ne 0)
+			{
+				$Host.UI.Write($InputObject.Substring(0, $StartHighlight[0]))
+			}
+			### Highlight & write excluding last highlight ###
+			for ($i = 0; $i -lt $StartHighlight.Length - 1; $i++)
+			{
+				$Host.UI.Write($ForegroundColor, $BackgroundColor, $InputObject.Substring($StartHighlight[$i], $Length))
+				$Host.UI.Write($InputObject.Substring($StartHighlight[$i] + $Length, $StartHighlight[$i + 1] - ($StartHighlight[$i] + $Length)))
+			}
+			### Highlight the last one ###
+			if (($StartHighlight[-1] + $Length) -eq $InputObject.Length)
+			{
+				$Host.UI.WriteLine($ForegroundColor, $BackgroundColor, $InputObject.Substring($StartHighlight[-1], $Length))
+			}
+			else
+			{
+				$Host.UI.Write($ForegroundColor, $BackgroundColor, $InputObject.Substring($StartHighlight[-1], $Length))
+				$Host.UI.WriteLine($InputObject.Substring($StartHighlight[-1] + $Length))
+			}
+		}
+		else
+		{
+			if ($HideNotMatch)
+			{
+				Write-Debug $InputObject
+			}
+			else
+			{
+				### Write line number ###
+				if ($LineNum)
+				{
+					$Host.UI.Write('DarkCyan', $bgLine, "$l ")
+					$Host.UI.Write($fgPipe, $bgLine, "|")
+				}
+				
+				### Write line ###
+				$Host.UI.WriteLine($InputObject)
+			}
+		}
+	}
+	End { }
+	
+} #EndFunction Write-HostHighlight
