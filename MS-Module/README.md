@@ -27,3 +27,4 @@ For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [
 |5|[<b>Start-SleepProgress</b>](https://ps1code.com/2016/11/20/sleep-powershell-scripts-progress-bar)|Put a script or cmdlet to sleep for specified `interval` or until specified `timestamp`|
 |6|[<b>Sort-IpAddress</b>](https://ps1code.com/2017/10/26/sort-ip-address-powershell)|Intellectually sort IP addresses|
 |7|[<b>Write-HostHighlight</b>](https://ps1code.com/2019/01/22/highlight-powershell)|Monitor and highlight log files|
+|8|[<b>Write-Ascii</b>](https://ps1code.com/2019/01/24/ascii-powershell)|Write output by using ASCII art fonts|
