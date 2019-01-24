@@ -988,3 +988,100 @@ Function Write-HostHighlight
 	End { }
 	
 } #EndFunction Write-HostHighlight
+
+Function Write-Ascii
+{
+	
+<#
+.SYNOPSIS
+	Write output by using ASCII art fonts.
+.DESCRIPTION
+	This function draws custom text in the PowerShell
+	console using ASCII art fonts.
+.PARAMETER Text
+	Specifies custom text, the special symbols `r & `t are escaped.
+.PARAMETER Font
+	Specifies supported ASCII font.
+.PARAMETER BackgroundColor
+	Specifies background color.
+.PARAMETER ForegroundColor
+	Specifies font color.
+.EXAMPLE
+	PS C:\> Write-Ascii $env:USERNAME
+.EXAMPLE
+	PS C:\> Write-Ascii "game`nover!" Electronic -ForegroundColor Red
+.EXAMPLE
+	PS C:\> Write-Ascii -Text "$($env:USERNAME)`n$($env:COMPUTERNAME)" -BackgroundColor Yellow -ForegroundColor Blue
+.EXAMPLE
+	PS C:\> Write-Ascii ("the`n10" + " "*10 + "spaces") -bgc Red
+	The `n (EOL) symbol and space multiplaying.
+.EXAMPLE
+	PS C:\> Write-Ascii "the`n3$(' '*3)spaces" -Font Electronic -fgc Yellow
+.EXAMPLE
+	PS C:\> [Enum]::GetValues([System.ConsoleColor]) |% { Write-Ascii $_ -fgc $_ }
+.EXAMPLE
+	PS C:\> 'random color' | Write-Ascii -bgc (Get-Random -Min 0 -Max 15)
+	Randomize colors.
+.NOTES
+	Author      :: Roman Gelman @rgelman75
+	Shell       :: Tested on PowerShell 5.0
+	Requirement :: PowerShell 3.0
+	Version 1.0 :: 23-Jan-2019 :: [Release] :: Publicly available
+.LINK
+	https://ps1code.com/2019/01/24/ascii-powershell
+#>
+	
+	[CmdletBinding()]
+	[Alias("Write-Banner")]
+	Param (
+		[Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+		[Alias("Banner")]
+		[string]$Text
+		 ,
+		[Parameter(Position = 1)]
+		[ValidateSet('AnsiShadow', 'Electronic')]
+		[string]$Font = 'AnsiShadow'
+		 ,
+		[Parameter()]
+		[Alias('fgc')]
+		[System.ConsoleColor]$ForegroundColor
+		 ,
+		[Parameter()]
+		[Alias('bgc')]
+		[System.ConsoleColor]$BackgroundColor
+	)
+	
+	Begin { }
+	Process
+	{
+		foreach ($Line1 in ($Text.Replace("`t", $null).Replace("`r", $null) -split "`n"))
+		{
+			$FilePath = @()
+			foreach ($Char in $Line1.ToCharArray())
+			{
+				$File = switch -regex ($Char)
+				{
+					'[A-Za-z0-9]' { $Char }
+					default { [byte][char]$Char }
+				}
+				$FilePath += if (Test-Path ($FullFile = "$PSScriptRoot\Ascii\$Font\$($File).font") -PathType Leaf) { $FullFile }
+				else { Write-Verbose "The [$Char] char is not supported by the [$Font] font" }
+			}
+			
+			if ($FilePath)
+			{
+				for ($i = 0; $i -lt (Get-Content $FilePath[0] | Measure-Object -Line).Lines; $i++)
+				{
+					$WholeLine = $null
+					foreach ($File1 in $FilePath) { $WholeLine += (Get-Content $File1 -Encoding UTF8)[$i] }
+					$Params = @{ 'Object' = "$WholeLine" }
+					if ($PSBoundParameters.ContainsKey('BackgroundColor')) { $Params.Add('BackgroundColor', $BackgroundColor) }
+					if ($PSBoundParameters.ContainsKey('ForegroundColor')) { $Params.Add('ForegroundColor', $ForegroundColor) }
+					Write-Host @Params
+				}
+			}
+		}
+	}
+	End { }
+	
+} #EndFunction Write-Ascii
