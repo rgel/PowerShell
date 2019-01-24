@@ -15,7 +15,7 @@ RootModule = 'MS-Module'
 ModuleVersion = '1.0.9.0'
 
 # ID used to uniquely identify this module
-GUID = '3bb9c8e3-9ff3-49b0-99c5-9066a6957759'
+GUID = '3bb9c8e3-9ff3-49b0-99c5-9066a6957769'
 
 # Author of this module
 Author = 'Roman Gelman @rgelman75'
