@@ -1,22 +1,22 @@
-# ![powershell-black-256](https://user-images.githubusercontent.com/6964549/49572827-4b870680-f945-11e8-9132-7f8e69bc7247.png)Microsoft Infra Automation Module
+# ![powershell-black-256](https://user-images.githubusercontent.com/6964549/49572827-4b870680-f945-11e8-9132-7f8e69bc7247.png)$${\color{green}Microsoft \space Infra \space Automation \space Module}$$
 
-To install this module, drop the entire '<b>MS-Module</b>' folder into one of your module directories.
+To install this module, drop the entire `MS-Module` folder into one of your module directories
 
-The default PowerShell module paths are listed in the `$env:PSModulePath` environment variable.
+The default PowerShell module paths are listed in the `$env:PSModulePath` environment variable
 
 To make it look better, split the paths in this manner: `$env:PSModulePath -split ';'`
 
-The default per-user module path is: `"$env:HOMEDRIVE$env:HOMEPATH\Documents\WindowsPowerShell\Modules"`.
+The default per-user module path is: `"$env:HOMEDRIVE$env:HOMEPATH\Documents\WindowsPowerShell\Modules"`
 
-The default computer-level module path is: `"$env:windir\System32\WindowsPowerShell\v1.0\Modules"`.
+The default computer-level module path is: `"$env:windir\System32\WindowsPowerShell\v1.0\Modules"`
 
-To use the module, type following command: `Import-Module MS-Module -Force -Verbose`.
+To use the module, type following command: `Import-Module MS-Module -Force -Verbose`
 
-To get the module version type following command: `Get-Module -ListAvailable |? {$_.Name -eq 'MS-Module'}`.
+To get the module version type following command: `Get-Module -ListAvailable |? {$_.Name -eq 'MS-Module'}`
 
-To see the commands imported, type `Get-Command -Module MS-Module`.
+To see the commands imported, type `Get-Command -Module MS-Module`
 
-For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [-Online][-Examples]`.
+For help on each individual cmdlet or function, run `Get-Help CmdletName -Full [-Online][-Examples]`
 
 |No|Cmdlet|Description|
 |----|----|----|
