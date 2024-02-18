@@ -1,6 +1,6 @@
-# ![powershell-black-256](https://user-images.githubusercontent.com/6964549/49572827-4b870680-f945-11e8-9132-7f8e69bc7247.png)PowerShell Repo
+# ![powershell-black-256](https://user-images.githubusercontent.com/6964549/49572827-4b870680-f945-11e8-9132-7f8e69bc7247.png)$${\color{blue}PowerShell \space Repo}$$
 
-### SCRIPTS
+### $${\color{green}SCRIPTS}$$
 
 |No|Script|Description|
 |----|----|----|
@@ -8,7 +8,7 @@
 |2|[<b>Get-MOTD.ps1</b>](https://github.com/rgel/PowerShell/blob/master/Get-MOTD.ps1)|[Edited](https://ps1code.com/2016/07/16/percentage-bar-powershell) version of `Get-MOTD` function written by Michal Millar|
 
 ##
-### MODULES
+### $${\color{green}MODULES}$$
 
 |No|Module|Description|
 |----|----|----|
